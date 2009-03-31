@@ -4,6 +4,9 @@ cltwitter - a command-line utility for Twitter
 DEPENDENCIES)
  - libcurl
  
+INSTALLATION)
+make && sudo make install
+
 CONFIGURATION)
 Create the file .cltwitter in your home directory and make sure that it is readable:
 
@@ -18,3 +21,6 @@ Edit the contents of the file to look like this:
 where <twitter_username> and <twitter_password> represents the username and password
 for your Twitter account. NOTE: The configuration file parser is currently white-space 
 agnostic. As an example, "username = john" will not parse, but "username=john" will.  
+
+USAGE)
+tweet "Hello Twitter!"
