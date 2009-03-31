@@ -31,42 +31,47 @@ typedef struct {
 } config;
 
 config *parse_config(void);
+char *url_encode(char*);
 
 int main(int argc, char *argv[]) {
   
   /* require at least one argument */
   if (argc < 2) {
-    printf("usage: twitter [message]\n");
+    printf("Usage: twitter [message]\n");
     return -1;
   } else if (argc > 2) {
-    printf("warning: ignored additional arguments. please enclose messages containing spaces in quotes.");
+    printf("Error: Too many arguments. Please enclose messages containing spaces in quotes.");
+    return -1;
   }
   
-  /* message length limit */
+  /* check message length */
   int length = strlen(argv[1]);
-  
   if (length > MAX_MESSAGE_LENGTH) {
-    printf("error: message can be at most %d characters long.\n", MAX_MESSAGE_LENGTH);
+    printf("Error: Message can be at most %d characters long according to Twitter.\n", MAX_MESSAGE_LENGTH);
     return -1;
   }
   
   /* format POST data */
-  char data[length + 7];  
-  strcpy(data, "status=");
-  strcat(data, argv[1]);
+  int size = length + 7; // make space for "status=" 
+  char data[size];
+  char* url_encoded_status = url_encode(argv[1]);
+  snprintf(data, size, "%s%s", "status=", url_encoded_status);
+  free(url_encoded_status);
   
   /* load configuration */
-  char userpwd[200];
   config *cfg = parse_config();
   
   if(!cfg) {
     printf("error: could not load configuration. make sure that the file ... exists, is readable and contains the necessary information (see the README for more information).\n");
     return -1;
   }
-
-  strcpy(userpwd, cfg->username);
-  strcat(userpwd, ":");
-  strcat(userpwd, cfg->password);
+  
+  size = strlen(cfg->username) + strlen(cfg->password) + 2; // string lengths + ':' + '\0'
+  char userpwd[size];
+  snprintf(userpwd, size, "%s:%s", cfg->username, cfg->password);
+  free(cfg->username);
+  free(cfg->password);
+  free(cfg);
   
   /* send update */
   CURL *curl;
@@ -79,7 +84,7 @@ int main(int argc, char *argv[]) {
     FILE *dev_null = fopen("/dev/null", "w");
     
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, dev_null);
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "cltwitter (0.1+20081025)");
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "cltwitter (20090331)");
     curl_easy_setopt(curl, CURLOPT_URL, "http://twitter.com/statuses/update.xml");
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
     
@@ -92,6 +97,7 @@ int main(int argc, char *argv[]) {
       printf("error: %s\n", curl_easy_strerror(res));
     
     curl_easy_cleanup(curl);
+    fclose(dev_null);
   }
   
   return 0;
@@ -100,11 +106,11 @@ int main(int argc, char *argv[]) {
 config *parse_config() {
   config *cfg;
   FILE *fp;
-  char *cfg_path;
-  
-  if (getenv("HOME")) {
-    cfg_path = getenv("HOME");
-    strcat(cfg_path, "/.cltwitter");
+  char *cfg_path = getenv("HOME");
+  static char cfg_file[] = ".cltwitter";
+ 
+  if (cfg_path) {
+    snprintf(cfg_path, strlen(cfg_path) + strlen(cfg_file) + 1, "%s/%s", cfg_path, cfg_file);
   } else {
     return NULL;
   }
@@ -119,8 +125,34 @@ config *parse_config() {
       sscanf(line, "password=%s", cfg->password);
     }
     
+    fclose(fp);
     return cfg;
   } else {
     return NULL;
   }
 }
+
+char from_hex(char ch) {
+  return isdigit(ch) ? ch - '0' : tolower(ch) - 'a' + 10;
+}
+
+char to_hex(char code) {
+  static char hex[] = "0123456789abcdef";
+  return hex[code & 15];
+}
+
+char *url_encode(char *str) {
+  char *pstr = str, *buf = malloc(strlen(str) * 3 + 1), *pbuf = buf;
+  while (*pstr) {
+    if (isalnum(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.' || *pstr == '~') 
+      *pbuf++ = *pstr;
+    else if (*pstr == ' ') 
+      *pbuf++ = '+';
+    else 
+      *pbuf++ = '%', *pbuf++ = to_hex(*pstr >> 4), *pbuf++ = to_hex(*pstr & 15);
+    pstr++;
+  }
+  *pbuf = '\0';
+  return buf;
+}
+
