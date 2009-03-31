@@ -19,7 +19,7 @@ Edit the contents of the file to look like this:
   password=<twitter_password>
   
 where <twitter_username> and <twitter_password> represents the username and password
-for your Twitter account. NOTE: The configuration file parser is currently white-space 
+for your Twitter account. NOTE: The configuration file parser is currently not white-space 
 agnostic. As an example, "username = john" will not parse, but "username=john" will.  
 
 USAGE)
