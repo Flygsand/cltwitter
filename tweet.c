@@ -47,6 +47,7 @@ typedef struct {
 
 config *parse_config(void);
 char *url_encode(char*);
+size_t ignore_data(void*, size_t, size_t, void*);
 
 int main(int argc, char *argv[]) {
   
@@ -83,23 +84,16 @@ int main(int argc, char *argv[]) {
   CURL *curl = curl_easy_init();
   CURLcode res;
   
-  if (curl) {
-    
-    FILE *dev_null = fopen("/dev/null", "w");
-    
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, dev_null);
+  if (curl) {  
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, ignore_data);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "cltwitter (" VERSION ")");
     curl_easy_setopt(curl, CURLOPT_URL, TWITTER_UPDATE_URL);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
-    
     curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
     curl_easy_setopt(curl, CURLOPT_USERPWD, userpwd);
     
     res = curl_easy_perform(curl);
-    
     curl_easy_cleanup(curl);
-    fclose(dev_null);
-    
     if (res != CURLE_OK)
       COMPLAIN_AND_EXIT("Error: %s\n", curl_easy_strerror(res));
   }
@@ -175,5 +169,9 @@ char *url_encode(char *str) {
   }
   *pbuf = '\0';
   return buf;
+}
+
+size_t ignore_data(void *ptr, size_t size, size_t nmemb, void *stream) {
+  return size*nmemb;
 }
 
