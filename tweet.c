@@ -101,8 +101,7 @@ int main(int argc, char *argv[]) {
     fclose(dev_null);
     
     if (res != CURLE_OK)
-      COMPLAIN_AND_EXIT("Error: Twitter connection gave the following error \"%s\n\"", 
-        curl_easy_strerror(res));
+      COMPLAIN_AND_EXIT("Error: %s\n", curl_easy_strerror(res));
   }
   
   return 0;
