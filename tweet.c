@@ -19,17 +19,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+#ifdef _WIN32
+  #define CURL_STATICLIB
+  #define SNPRINTF _snprintf
+  #define HOME "USERPROFILE"
+  #define DS "\\"
+#else
+  #define SNPRINTF snprintf
+  #define HOME "HOME"
+  #define DS "/"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <curl/curl.h>
 
-#define VERSION "20090402"
+#define VERSION "20090403"
 #define CONFIG_FILENAME ".cltwitter"
 #define MAX_MESSAGE_LENGTH 140
 #define MAX_USERNAME_PWD_LENGTH 100
 #define TWITTER_UPDATE_URL "http://twitter.com/statuses/update.xml"
+
+#define DATA_LENGTH 3*MAX_MESSAGE_LENGTH + 8
+#define USERPWD_LENGTH 2*MAX_USERNAME_PWD_LENGTH + 2
 
 #define S(X) STRINGIFY(X)
 #define STRINGIFY(X) #X
@@ -50,39 +64,41 @@ char *url_encode(char*);
 size_t ignore_data(void*, size_t, size_t, void*);
 
 int main(int argc, char *argv[]) {
-  
+  int length;
+  char data[DATA_LENGTH];
+  char userpwd[USERPWD_LENGTH];
+  char *url_encoded_status;
+  config *cfg;
+  CURL *curl;
+  CURLcode res;
+
   /* require one argument */
   if (argc != 2)
     COMPLAIN_AND_EXIT("cltwitter, version " VERSION "\nUsage: tweet [message]\nNOTE: Make sure that [message] is surrounded by quotes!\n");
   
   /* check message length */
-  int length = strlen(argv[1]);
+  length = strlen(argv[1]);
   if (length == 0 || length > MAX_MESSAGE_LENGTH)
     COMPLAIN_AND_EXIT("Error: Message must be between 1 and " S(MAX_MESSAGE_LENGTH) " characters long.\n");
   
   /* format POST data */
-  int size = length * 3 + 8; // url-encoded string + ("status=" + '\0')
-  char data[size];
-  char *url_encoded_status = url_encode(argv[1]);
-  snprintf(data, size, "%s%s", "status=", url_encoded_status);
+  url_encoded_status = url_encode(argv[1]);
+  SNPRINTF(data, DATA_LENGTH, "%s%s", "status=", url_encoded_status);
   free(url_encoded_status);
-  
+
   /* load configuration */
-  config *cfg = parse_config();
+  cfg = parse_config();
   
   if(!cfg)
     COMPLAIN_AND_EXIT("Error: Could not load configuration. Make sure that the " \
       "configuration file exists, is readable and contains the necessary " \
       "information (see the README for more information).\n");
   
-  size = 2*MAX_USERNAME_PWD_LENGTH + 2; // ':' + '\0'
-  char userpwd[size];
-  snprintf(userpwd, size, "%s:%s", cfg->username, cfg->password);
+  SNPRINTF(userpwd, USERPWD_LENGTH, "%s:%s", cfg->username, cfg->password);
   free(cfg);
   
   /* send update */
-  CURL *curl = curl_easy_init();
-  CURLcode res;
+  curl = curl_easy_init();
   
   if (curl) {  
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, ignore_data);
@@ -102,14 +118,14 @@ int main(int argc, char *argv[]) {
 }
 
 config *parse_config() {
-  config *cfg;
-  FILE *fp; 
-  char *cfg_dir = getenv("HOME");
+  char *cfg_dir = getenv(HOME);
   size_t size = strlen(cfg_dir) + strlen(CONFIG_FILENAME) + 2; // '/' + '\0'
   char *cfg_path = malloc(size);
+  FILE *fp; 
+  config *cfg;
   
   if (cfg_dir) {
-    snprintf(cfg_path, size, "%s/%s", cfg_dir, CONFIG_FILENAME);
+    SNPRINTF(cfg_path, size, "%s%s%s", cfg_dir, DS, CONFIG_FILENAME);
   } else {
     free(cfg_path);
     return NULL;
@@ -174,4 +190,3 @@ char *url_encode(char *str) {
 size_t ignore_data(void *ptr, size_t size, size_t nmemb, void *stream) {
   return size*nmemb;
 }
-

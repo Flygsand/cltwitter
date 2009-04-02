@@ -1,26 +1,47 @@
+==============================================
 cltwitter - a command-line utility for Twitter
 ==============================================
 
 DEPENDENCIES)
+=============
  - libcurl
  
 INSTALLATION)
-make && sudo make install
+=============
+*NIX:
+  make && sudo make install
+
+Windows:
+  Binary: Download latest here: http://io.thesmilingpenguin.com/cltwitter/tweet.exe
+          Copy it to C:\Windows or C:\Windows\system32 (or any other place that is in your
+          PATH). The Windows binary comes with a statically linked copy of libcurl, so all you
+          need is the executable.
+
+  From source: tweet.vcproj is provided for Visual Studio users. Make sure you grab a copy
+               of libcurl and point your compiler to the correct location of the headers
+               and libraries.
 
 CONFIGURATION)
-Create the file .cltwitter in your home directory and make sure that it is readable:
+==============
+Create the file .cltwitter in your home directory.
 
+*NIX
   cd
-  touch .cltwitter
+  nano -w .cltwitter
 
-Edit the contents of the file to look like this:
+Windows:
+  cd C:\Documents and Settings\YOUR_WINDOWS_USERNAME
+  notepad .cltwitter
+ 
+The contents of .cltwitter should look like this:
   
   username=<twitter_username>
   password=<twitter_password>
   
 where <twitter_username> and <twitter_password> represents the username and password
-for your Twitter account. NOTE: The configuration file parser is currently not white-space 
-agnostic. As an example, "username = john" will not parse, but "username=john" will.  
+for your Twitter account. NOTE: The configuration file parser is currently sensitive
+to white-space. As an example, "username = john" will not parse, but "username=john" will.  
 
 USAGE)
+======
 tweet "Hello Twitter!"
