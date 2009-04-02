@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <curl/curl.h>
 
-#define VERSION "20090401"
+#define VERSION "20090402"
 #define CONFIG_FILENAME ".cltwitter"
 #define MAX_MESSAGE_LENGTH 140
 #define MAX_USERNAME_PWD_LENGTH 100
@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     COMPLAIN_AND_EXIT("Error: Message must be between 1 and " S(MAX_MESSAGE_LENGTH) " characters long.\n");
   
   /* format POST data */
-  int size = length + 8; // "status=" + '\0'
+  int size = length * 3 + 8; // url-encoded string + ("status=" + '\0')
   char data[size];
   char *url_encoded_status = url_encode(argv[1]);
   snprintf(data, size, "%s%s", "status=", url_encoded_status);
