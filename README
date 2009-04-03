@@ -17,10 +17,6 @@ Windows:
           PATH). The Windows binary comes with a statically linked copy of libcurl, so all you
           need is the executable.
 
-  From source: tweet.vcproj is provided for Visual Studio users. Make sure you grab a copy
-               of libcurl and point your compiler to the correct location of the headers
-               and libraries.
-
 CONFIGURATION)
 ==============
 Create the file .cltwitter in your home directory.
