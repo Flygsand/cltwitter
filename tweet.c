@@ -73,7 +73,7 @@ enum http_response_code {
 };
 
 config *parse_config(void);
-char *response_message(long);
+char *response_message(unsigned long);
 char *url_encode(char*);
 void trim(char**);
 size_t ignore_data(void*, size_t, size_t, void*);
@@ -196,7 +196,7 @@ config *parse_config() {
   }
 }
 
-char *response_message(long response_code) {
+char *response_message(unsigned long response_code) {
   switch (response_code) {
     case OK:
       return "Request was successful.";
