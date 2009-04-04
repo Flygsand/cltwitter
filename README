@@ -40,4 +40,14 @@ to white-space. As an example, "username = john" will not parse, but "username=j
 
 USAGE)
 ======
-tweet "Hello Twitter!"
+cltwitter supplies a command "tweet" for posting messages to Twitter. The command 
+accepts one argument (the message to be sent) on the command line or, if no argument
+is given, reads one line from standard input. Both usages are depicted below:
+
+Supplying Twitter message on the command line:
+  tweet "Hello Twitter!"
+
+Tweeting a random fortune cookie:
+  fortune | tweet
+
+In accordance with Twitter regulations, the supplied message must be 1-140 characters long. 
