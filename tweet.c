@@ -60,7 +60,20 @@ typedef struct {
   char password[MAX_USERNAME_PWD_LENGTH];
 } config;
 
+enum http_response_code {
+  OK = 200,
+  NOT_MODIFIED = 304,
+  BAD_REQUEST = 400,
+  NOT_AUTHORIZED = 401,
+  FORBIDDEN = 403,
+  NOT_FOUND = 404,
+  INTERNAL_SERVER_ERROR = 500,
+  BAD_GATEWAY = 502,
+  SERVICE_UNAVAILABLE = 503
+};
+
 config *parse_config(void);
+char *response_message(long);
 char *url_encode(char*);
 void trim(char**);
 size_t ignore_data(void*, size_t, size_t, void*);
@@ -74,6 +87,7 @@ int main(int argc, char *argv[]) {
   config *cfg;
   CURL *curl;
   CURLcode res;
+  unsigned long response_code;
   
   /* read input, either from argv or stdin */ 
   if (argc < 2) {
@@ -82,7 +96,9 @@ int main(int argc, char *argv[]) {
   } else if (argc == 2) {
     input = argv[1];
   } else {
-    COMPLAIN_AND_EXIT("cltwitter, version " VERSION "\nUsage: tweet [message]\nNOTE: Make sure that [message] is surrounded by quotes. If [message] is not given, data will be read from standard input.\n");
+    COMPLAIN_AND_EXIT("cltwitter, version " VERSION "\nUsage: tweet [message]\nNOTE: Make sure " \
+                      "that [message] is surrounded by quotes. If [message] is not given, data " \
+                      "will be read from standard input.\n");
   }
   
   /* remove leading/trailing whitespace from input */
@@ -104,8 +120,8 @@ int main(int argc, char *argv[]) {
   
   if(!cfg)
     COMPLAIN_AND_EXIT("Error: Could not load configuration. Make sure that the " \
-      "configuration file exists, is readable and contains the necessary " \
-      "information (see the README for more information).\n");
+                      "configuration file exists, is readable and contains the necessary " \
+                      "information (see the README for more information).\n");
   
   SNPRINTF(userpwd, USERPWD_LENGTH, "%s:%s", cfg->username, cfg->password);
   free(cfg);
@@ -122,9 +138,13 @@ int main(int argc, char *argv[]) {
     curl_easy_setopt(curl, CURLOPT_USERPWD, userpwd);
     
     res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
     curl_easy_cleanup(curl);
     if (res != CURLE_OK)
       COMPLAIN_AND_EXIT("Error: %s\n", curl_easy_strerror(res));
+    if (!(response_code == OK || response_code == NOT_MODIFIED))
+      COMPLAIN_AND_EXIT("Error: %s (#%lu)\n", response_message(response_code), response_code);
+    
   }
   
   return 0;
@@ -173,6 +193,32 @@ config *parse_config() {
       
     free(cfg_path);
     return NULL;
+  }
+}
+
+char *response_message(long response_code) {
+  switch (response_code) {
+    case OK:
+      return "Request was successful.";
+    case NOT_MODIFIED:
+      return "Resource has not been modified since last request (but the request was successful).";
+    case BAD_REQUEST:
+      return "Request was malformed. This is most likely a bug, please report it.";
+    case NOT_AUTHORIZED:
+      return "Unable to authorize. Make sure that the login credentials are correct.";
+    case FORBIDDEN:
+      return "Request was forbidden. If this problem persists, please report it as a bug.";
+    case NOT_FOUND:
+      return "Requested resource was not found. If this problem persists, please report it as a bug.";
+    case INTERNAL_SERVER_ERROR:
+      return "Something is broken on Twitter's servers. Please try again later, or report this " \
+             "to the Twitter team if the problem persists.";
+    case BAD_GATEWAY:
+      return "Twitter is currently down or being upgraded. Please try again later.";
+    case SERVICE_UNAVAILABLE:
+      return "Twitter's servers are overloaded at the moment. Please try again later.";
+    default:
+      return "Unknown response code. Please report this as a bug (including the response code).";
   }
 }
 
