@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
   cfg = parse_config();
   
   if(!cfg)
-    COMPLAIN_AND_EXIT("Error: Could not load configuration. Make sure that the " \
+    COMPLAIN_AND_EXIT("Error: Could not load or parse configuration. Make sure that the " \
                       "configuration file exists, is readable and contains the necessary " \
                       "information (see the README for more information).\n");
   
@@ -181,8 +181,10 @@ config *parse_config() {
     free(cfg_path);
     fclose(fp);
     
-    if (!(has_username && has_password))
-      COMPLAIN_AND_EXIT("Error: Couldn't parse the configuration file. Please refer to the README file.\n");
+    if (!(has_username && has_password)) {
+      free(cfg);
+      return NULL;
+    }
     
     return cfg;
   } else {
