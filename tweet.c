@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   #define HOME "USERPROFILE"
   #define DS "\\"
 #else
+  #define _GNU_SOURCE
   #define SNPRINTF snprintf
   #define HOME "HOME"
   #define DS "/"
@@ -36,7 +37,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <curl/curl.h>
 
-#define VERSION "20090403"
+#define VERSION "20090404"
 #define CONFIG_FILENAME ".cltwitter"
 #define MAX_MESSAGE_LENGTH 140
 #define MAX_USERNAME_PWD_LENGTH 100
@@ -61,31 +62,43 @@ typedef struct {
 
 config *parse_config(void);
 char *url_encode(char*);
+void trim(char**);
 size_t ignore_data(void*, size_t, size_t, void*);
 
 int main(int argc, char *argv[]) {
-  int length;
+  size_t length = 0;
+  size_t buf_size = 0;
+  char *input, *url_encoded_status;
   char data[DATA_LENGTH];
   char userpwd[USERPWD_LENGTH];
-  char *url_encoded_status;
   config *cfg;
   CURL *curl;
   CURLcode res;
-
-  /* require one argument */
-  if (argc != 2)
-    COMPLAIN_AND_EXIT("cltwitter, version " VERSION "\nUsage: tweet [message]\nNOTE: Make sure that [message] is surrounded by quotes!\n");
+  
+  /* read input, either from argv or stdin */ 
+  if (argc < 2) {
+    input = NULL;
+    getline(&input, &buf_size, stdin);
+  } else if (argc == 2) {
+    input = argv[1];
+  } else {
+    COMPLAIN_AND_EXIT("cltwitter, version " VERSION "\nUsage: tweet [message]\nNOTE: Make sure that [message] is surrounded by quotes. If [message] is not given, data will be read from standard input.\n");
+  }
+  
+  /* remove leading/trailing whitespace from input */
+  trim(&input); 
   
   /* check message length */
-  length = strlen(argv[1]);
+  length = strlen(input);
   if (length == 0 || length > MAX_MESSAGE_LENGTH)
     COMPLAIN_AND_EXIT("Error: Message must be between 1 and " S(MAX_MESSAGE_LENGTH) " characters long.\n");
   
   /* format POST data */
-  url_encoded_status = url_encode(argv[1]);
+  url_encoded_status = url_encode(input);
   SNPRINTF(data, DATA_LENGTH, "%s%s", "status=", url_encoded_status);
   free(url_encoded_status);
-
+  if (buf_size > 0) free(input); // free memory allocated by getline
+  
   /* load configuration */
   cfg = parse_config();
   
@@ -185,6 +198,22 @@ char *url_encode(char *str) {
   }
   *pbuf = '\0';
   return buf;
+}
+void trim(char **pstr) {
+  char *str, *eos = NULL;
+  char c;
+  
+  while (**pstr && isspace(**pstr))
+    (*pstr)++;
+    
+  str = *pstr;
+  
+  while (*str) {
+    c = *(str++);
+    if (!isspace(c)) eos = str;
+  }
+  
+  if (eos != NULL) *eos = '\0';
 }
 
 size_t ignore_data(void *ptr, size_t size, size_t nmemb, void *stream) {
