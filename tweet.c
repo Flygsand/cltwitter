@@ -25,7 +25,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   #define HOME "USERPROFILE"
   #define DS "\\"
 #else
-  #define _GNU_SOURCE
   #define SNPRINTF snprintf
   #define HOME "HOME"
   #define DS "/"
@@ -75,13 +74,13 @@ enum http_response_code {
 config *parse_config(void);
 char *response_message(unsigned long);
 char *url_encode(char*);
-void trim(char**);
+char *get_line(FILE*);
+char *trim(char*);
 size_t ignore_data(void*, size_t, size_t, void*);
 
 int main(int argc, char *argv[]) {
   size_t length = 0;
-  size_t buf_size = 0;
-  char *input, *url_encoded_status;
+  char *input, *trimmed_input, *url_encoded_status;
   char data[DATA_LENGTH];
   char userpwd[USERPWD_LENGTH];
   config *cfg;
@@ -91,8 +90,7 @@ int main(int argc, char *argv[]) {
   
   /* read input, either from argv or stdin */ 
   if (argc < 2) {
-    input = NULL;
-    getline(&input, &buf_size, stdin);
+    input = get_line(stdin);
   } else if (argc == 2) {
     input = argv[1];
   } else {
@@ -102,18 +100,18 @@ int main(int argc, char *argv[]) {
   }
   
   /* remove leading/trailing whitespace from input */
-  trim(&input); 
+  trimmed_input = trim(input); 
   
   /* check message length */
-  length = strlen(input);
+  length = strlen(trimmed_input);
   if (length == 0 || length > MAX_MESSAGE_LENGTH)
     COMPLAIN_AND_EXIT("Error: Message must be between 1 and " S(MAX_MESSAGE_LENGTH) " characters long.\n");
   
   /* format POST data */
-  url_encoded_status = url_encode(input);
+  url_encoded_status = url_encode(trimmed_input);
   SNPRINTF(data, DATA_LENGTH, "%s%s", "status=", url_encoded_status);
   free(url_encoded_status);
-  if (buf_size > 0) free(input); // free memory allocated by getline
+  if (argc < 2) free(input);
   
   /* load configuration */
   cfg = parse_config();
@@ -247,21 +245,56 @@ char *url_encode(char *str) {
   *pbuf = '\0';
   return buf;
 }
-void trim(char **pstr) {
-  char *str, *eos = NULL;
+
+char *get_line(FILE *stream) {
+  size_t capacity = MAX_MESSAGE_LENGTH, remaining = capacity;
+  char *line = malloc(capacity), *ptr = line, *expanded;
   char c;
   
-  while (**pstr && isspace(**pstr))
-    (*pstr)++;
+  if (line == NULL)
+    return NULL;
     
-  str = *pstr;
+  c = fgetc(stream);
+  while (c != EOF && c != '\n') {
+    
+    if (--remaining == 0) {
+      remaining = capacity;
+      expanded = realloc(line, capacity *= 2);
+      
+      if (expanded == NULL) {
+        free(line);
+        return NULL;
+      }
+      
+      ptr = expanded + (ptr - line);
+      line = expanded;
+      
+    }
+    
+    *(ptr++) = c;
+    c = fgetc(stream);
+  }
   
-  while (*str) {
-    c = *(str++);
-    if (!isspace(c)) eos = str;
+  return line;
+}
+
+char *trim(char *str) {
+  char *ptr, *eos = NULL;
+  char c;
+  
+  while (*str && isspace(*str))
+    ++str;
+
+  ptr = str;
+  
+  while (*ptr) {
+    c = *(ptr++);
+    if (!isspace(c)) eos = ptr;
   }
   
   if (eos != NULL) *eos = '\0';
+  
+  return str;
 }
 
 size_t ignore_data(void *ptr, size_t size, size_t nmemb, void *stream) {
