@@ -19,74 +19,36 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#ifdef _WIN32
-  #define CURL_STATICLIB
-  #define SNPRINTF _snprintf
-  #define HOME "USERPROFILE"
-  #define DS "\\"
-#else
-  #define SNPRINTF snprintf
-  #define HOME "HOME"
-  #define DS "/"
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <curl/curl.h>
-
-#define VERSION "20090404"
-#define CONFIG_FILENAME ".cltwitter"
-#define MAX_MESSAGE_LENGTH 140
-#define MAX_USERNAME_PWD_LENGTH 100
-#define TWITTER_UPDATE_URL "http://twitter.com/statuses/update.xml"
-
-#define DATA_LENGTH 3*MAX_MESSAGE_LENGTH + 8
-#define USERPWD_LENGTH 2*MAX_USERNAME_PWD_LENGTH + 2
-
-#define S(X) STRINGIFY(X)
-#define STRINGIFY(X) #X
-
-#define COMPLAIN_AND_EXIT(FORMAT, ...) { fprintf(stderr, FORMAT, ##__VA_ARGS__); exit(-1); }
-
-#define TRUE 1
-#define FALSE 0
-typedef unsigned char bool;
+#include <pcre.h>
+#include "definitions.h"
+#include "network_helpers.h"
+#include "string_io_helpers.h"
 
 typedef struct { 
   char username[MAX_USERNAME_PWD_LENGTH];
   char password[MAX_USERNAME_PWD_LENGTH];
 } config;
 
-enum http_response_code {
-  OK = 200,
-  NOT_MODIFIED = 304,
-  BAD_REQUEST = 400,
-  NOT_AUTHORIZED = 401,
-  FORBIDDEN = 403,
-  NOT_FOUND = 404,
-  INTERNAL_SERVER_ERROR = 500,
-  BAD_GATEWAY = 502,
-  SERVICE_UNAVAILABLE = 503
-};
-
 config *parse_config(void);
-char *response_message(unsigned long);
-char *url_encode(char*);
-char *get_line(FILE*);
-char *trim(char*);
-size_t ignore_data(void*, size_t, size_t, void*);
 
 int main(int argc, char *argv[]) {
-  size_t length = 0;
-  char *input, *trimmed_input, *url_encoded_status;
+  size_t length = 0, shortened_url_length = 0;
+  char *input, *trimmed_input, *url, *shortened_url, *url_encoded_status;
   char data[DATA_LENGTH];
   char userpwd[USERPWD_LENGTH];
   config *cfg;
   CURL *curl;
   CURLcode res;
   unsigned long response_code;
+  const char* regex_errmsg;
+  int regex_err_offset;
+  int match[2];
+  pcre *regexp = pcre_compile(URL_REGEX, PCRE_CASELESS, &regex_errmsg, &regex_err_offset, NULL);
   
   /* read input, either from argv or stdin */ 
   if (argc < 2) {
@@ -101,9 +63,26 @@ int main(int argc, char *argv[]) {
   
   /* remove leading/trailing whitespace from input */
   trimmed_input = trim(input); 
+  length = strlen(trimmed_input);
+  
+  /* shorten URLs */
+  if (regexp && (pcre_exec(regexp, NULL, trimmed_input, length, 0, 0, match, 2) >= 0)) {
+    url = malloc((match[1] - match[0] + 1)*sizeof(char));
+    strncpy(url, trimmed_input + match[0], (match[1] - match[0])*sizeof(char));
+    shortened_url = shorten_url(url);
+    shortened_url_length = strlen(shortened_url);
+    
+    if (shortened_url_length < (match[1] - match[0])) { // only use shortened URL if it's actually shorter
+      strcpy(trimmed_input + match[0], shortened_url); // copy shortened url into place
+      strcpy(trimmed_input + match[0] + shortened_url_length, trimmed_input + match[1]); // copy chars after URL
+    }
+    
+    free(url);
+    free(shortened_url);
+    pcre_free(regexp);  
+  }
   
   /* check message length */
-  length = strlen(trimmed_input);
   if (length == 0 || length > MAX_MESSAGE_LENGTH)
     COMPLAIN_AND_EXIT("Error: Message must be between 1 and " S(MAX_MESSAGE_LENGTH) " characters long.\n");
   
@@ -139,9 +118,9 @@ int main(int argc, char *argv[]) {
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
     curl_easy_cleanup(curl);
     if (res != CURLE_OK)
-      COMPLAIN_AND_EXIT("Error: %s\n", curl_easy_strerror(res));
+      COMPLAIN_AND_EXIT("(Twitter) Error: %s\n", curl_easy_strerror(res));
     if (!(response_code == OK || response_code == NOT_MODIFIED))
-      COMPLAIN_AND_EXIT("Error: %s (#%lu)\n", response_message(response_code), response_code);
+      COMPLAIN_AND_EXIT("(Twitter) Error: %s (#%lu)\n", response_message(response_code), response_code);
     
   }
   
@@ -194,109 +173,4 @@ config *parse_config() {
     free(cfg_path);
     return NULL;
   }
-}
-
-char *response_message(unsigned long response_code) {
-  switch (response_code) {
-    case OK:
-      return "Request was successful.";
-    case NOT_MODIFIED:
-      return "Resource has not been modified since last request (but the request was successful).";
-    case BAD_REQUEST:
-      return "Request was malformed. This is most likely a bug, please report it.";
-    case NOT_AUTHORIZED:
-      return "Unable to authorize. Make sure that the login credentials are correct.";
-    case FORBIDDEN:
-      return "Request was forbidden. If this problem persists, please report it as a bug.";
-    case NOT_FOUND:
-      return "Requested resource was not found. If this problem persists, please report it as a bug.";
-    case INTERNAL_SERVER_ERROR:
-      return "Something is broken on Twitter's servers. Please try again later, or report this " \
-             "to the Twitter team if the problem persists.";
-    case BAD_GATEWAY:
-      return "Twitter is currently down or being upgraded. Please try again later.";
-    case SERVICE_UNAVAILABLE:
-      return "Twitter's servers are overloaded at the moment. Please try again later.";
-    default:
-      return "Unknown response code. Please report this as a bug (including the response code).";
-  }
-}
-
-char from_hex(char ch) {
-  return isdigit(ch) ? ch - '0' : tolower(ch) - 'a' + 10;
-}
-
-char to_hex(char code) {
-  static char hex[] = "0123456789abcdef";
-  return hex[code & 15];
-}
-
-char *url_encode(char *str) {
-  char *pstr = str, *buf = malloc(strlen(str) * 3 + 1), *pbuf = buf;
-  while (*pstr) {
-    if (isalnum(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.' || *pstr == '~') 
-      *pbuf++ = *pstr;
-    else if (*pstr == ' ') 
-      *pbuf++ = '+';
-    else 
-      *pbuf++ = '%', *pbuf++ = to_hex(*pstr >> 4), *pbuf++ = to_hex(*pstr & 15);
-    pstr++;
-  }
-  *pbuf = '\0';
-  return buf;
-}
-
-char *get_line(FILE *stream) {
-  size_t capacity = MAX_MESSAGE_LENGTH, remaining = capacity;
-  char *line = malloc(capacity), *ptr = line, *expanded;
-  char c;
-  
-  if (line == NULL)
-    return NULL;
-    
-  c = fgetc(stream);
-  while (c != EOF && c != '\n') {
-    
-    if (--remaining == 0) {
-      remaining = capacity;
-      expanded = realloc(line, capacity *= 2);
-      
-      if (expanded == NULL) {
-        free(line);
-        return NULL;
-      }
-      
-      ptr = expanded + (ptr - line);
-      line = expanded;
-      
-    }
-    
-    *(ptr++) = c;
-    c = fgetc(stream);
-  }
-  
-  return line;
-}
-
-char *trim(char *str) {
-  char *ptr, *eos = NULL;
-  char c;
-  
-  while (*str && isspace(*str))
-    ++str;
-
-  ptr = str;
-  
-  while (*ptr) {
-    c = *(ptr++);
-    if (!isspace(c)) eos = ptr;
-  }
-  
-  if (eos != NULL) *eos = '\0';
-  
-  return str;
-}
-
-size_t ignore_data(void *ptr, size_t size, size_t nmemb, void *stream) {
-  return size*nmemb;
 }

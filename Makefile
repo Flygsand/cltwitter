@@ -1,8 +1,8 @@
 CC = gcc
 CFLAGS = -Wall
 PROG = tweet
-LIBS = -lcurl
-SRCS = tweet.c
+LIBS = -lcurl -lpcre
+SRCS = definitions.h network_helpers.c string_io_helpers.c tweet.c
 INSTALLDIR = /usr/bin
 
 $(PROG): $(SRCS)
