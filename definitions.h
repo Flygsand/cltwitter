@@ -3,6 +3,7 @@
 
 #ifdef _WIN32
   #define CURL_STATICLIB
+  #define PCRE_STATIC
   #define SNPRINTF _snprintf
   #define HOME "USERPROFILE"
   #define DS "\\"

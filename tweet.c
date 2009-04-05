@@ -19,13 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+#include "definitions.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <curl/curl.h>
 #include <pcre.h>
-#include "definitions.h"
 #include "network_helpers.h"
 #include "string_io_helpers.h"
 
