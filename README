@@ -24,10 +24,12 @@ Create the file .cltwitter in your home directory.
 *NIX
   cd
   nano -w .cltwitter
+  chmod 400 .cltwitter
 
 Windows:
   cd C:\Documents and Settings\YOUR_WINDOWS_USERNAME
   notepad .cltwitter
+  cacls .cltwitter YOUR_WINDOWS_USERNAME:F
  
 The contents of .cltwitter should look like this:
   
