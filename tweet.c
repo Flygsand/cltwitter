@@ -78,9 +78,11 @@ int main(int argc, char *argv[]) {
     }
     
     free(url);
-    free(shortened_url);
-    pcre_free(regexp);  
+    free(shortened_url);  
   }
+  
+  if (regexp)
+    pcre_free(regexp);
   
   /* check message length */
   if (length == 0 || length > MAX_MESSAGE_LENGTH)
