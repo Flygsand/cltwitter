@@ -5,6 +5,7 @@ cltwitter - a command-line utility for Twitter
 DEPENDENCIES)
 =============
  - libcurl
+ - libpcre
  
 INSTALLATION)
 =============
@@ -14,8 +15,7 @@ INSTALLATION)
 Windows:
   Binary: Download latest here: http://io.thesmilingpenguin.com/cltwitter/tweet.exe
           Copy it to C:\Windows or C:\Windows\system32 (or any other place that is in your
-          PATH). The Windows binary comes with a statically linked copy of libcurl, so all you
-          need is the executable.
+          PATH).
 
 CONFIGURATION)
 ==============
