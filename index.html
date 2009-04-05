@@ -4,13 +4,23 @@ title: cltwitter
 ---
 
 <h1>cltwitter</h1>
-<p>cltwitter is a command-line utility for posting updates to <a href="http://twitter.com">Twitter</a> written in C.</p> 
+<p>cltwitter is a command-line utility for posting updates to <a href="http://twitter.com">Twitter</a> written in C.</p>
+
+<h2>Features</h2>
+<ul>
+  <li>Handles input data from both the command line and standard input (e.g. piping)</li>
+  <li>As of version 20090405, cltwitter auto-shortens URLs using the <a href="http://is.gd">is.gd</a> API. Due to lack of testing, this feature has not yet been merged into the master branch. It currently resides in the <a href="http://github.com/mtah/cltwitter/tree/shorten-url">shorten-url</a> branch.</li>
+</ul>
 
 <h2>Example usage</h2>
-<p>cltwitter can handle two sorts of input. Either a command line argument:
+<p>cltwitter supplies a command "tweet" for posting messages to Twitter. The command 
+accepts one argument (the message to be sent) on the command line or, if no argument
+is given, reads one line from standard input. Both usages are depicted below.</p>
+
+<p>Supplying Twitter message on the command line:</p>
 <pre class="terminal"><code>$ tweet "Hello Twitter!"</code></pre>
 
-or from standard input (here piping from the UNIX command <a href="http://en.wikipedia.org/wiki/Fortune_(Unix)">fortune</a>):
+<p>Supplying Twitter message on standard input (here piping from the UNIX command <a href="http://en.wikipedia.org/wiki/Fortune_(Unix)">fortune</a>):
 <pre class="terminal"><code>$ fortune | tweet</code></pre></p>
 
 <h2>Get it</h2>
@@ -20,8 +30,10 @@ or from standard input (here piping from the UNIX command <a href="http://en.wik
 </ul>
 
 <h2>Installation instructions</h2>
-<p>Consult the <a href="http://github.com/mtah/cltwitter/blob/master/README">README</a> for all the know-how.</p>
+<p>Consult the <a href="http://github.com/mtah/cltwitter/blob/master/README">README</a> document provided with the source package for all the how-tos and know-hows.</p>
 
 <h2>Found bugs?</h2>
 <p>Report them <a href="http://mtah.lighthouseapp.com/projects/28407-cltwitter">here</a>.</p>
 
+<h2>License</h2>
+<p>cltwitter is free software licensed under the <a href="http://www.gnu.org/licenses/quick-guide-gplv3.html">GNU General Public License, version 3</a>. If you enjoy reading legal mumbo jumbo, check out the <a href="http://github.com/mtah/cltwitter/blob/master/COPYING">COPYING</a> document provided with the source package.</p>

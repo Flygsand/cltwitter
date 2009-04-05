@@ -23,36 +23,3 @@ a:hover, #post a:hover { border-bottom: 2px solid #cc0000; }
 #codes strong, #post .meta  { color: lightgray; }
 #post { margin-left: auto; margin-right: auto; }
 #post pre { background-color:#444444; line-height: 1.5em; padding: 0 0.4em; }
-#seinfeld-calendar-iframe {
-  position: relative; margin: 0 auto; height: 190px; width: 260px;
-}
-
-#seinfeld-calendar-wrapper {
-  position: absolute;
-  top: 150px;
-  right: 100px;
-  text-align: center;
-}
-
-#seinfeld-calendar { 
-  background: transparent url(/images/seinfeld_calendar_bg.png) no-repeat top left; 
-  height: 315px; 
-  width: 300px; 
-  text-align: center;
-}
-
-#seinfeld-calendar-title {
-  position: relative;
-  text-align: center;
-  width: 300px;
-  height: 100px;
-}
-
-#seinfeld-calendar-title span {
-  font-size: 1.5em;
-  font-weight: bold;
-  position: absolute;
-  bottom: 0.5em;
-  left: 0;
-  width: 100%;
-}
