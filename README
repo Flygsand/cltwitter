@@ -29,7 +29,7 @@ Create the file .cltwitter in your home directory.
 Windows:
   cd C:\Documents and Settings\YOUR_WINDOWS_USERNAME
   notepad .cltwitter
-  cacls .cltwitter YOUR_WINDOWS_USERNAME:F
+  cacls .cltwitter YOUR_WINDOWS_USERNAME:R
  
 The contents of .cltwitter should look like this:
   
