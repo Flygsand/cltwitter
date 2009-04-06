@@ -13,7 +13,7 @@
   #define DS "/"
 #endif
 
-#define VERSION "20090405"
+#define VERSION "20090406"
 #define CONFIG_FILENAME ".cltwitter"
 #define MAX_MESSAGE_LENGTH 140
 #define MAX_USERNAME_PWD_LENGTH 100

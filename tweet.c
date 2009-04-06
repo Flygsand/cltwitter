@@ -37,7 +37,7 @@ typedef struct {
 config *parse_config(void);
 
 int main(int argc, char *argv[]) {
-  size_t length = 0, shortened_url_length = 0;
+  size_t length = 0, url_length = 0, shortened_url_length = 0;
   char *input, *trimmed_input, *url, *shortened_url, *url_encoded_status;
   char data[DATA_LENGTH];
   char userpwd[USERPWD_LENGTH];
@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
   CURLcode res;
   unsigned long response_code;
   const char* regex_errmsg;
-  int regex_err_offset;
+  int regex_result, regex_match_offset, regex_err_offset;
   int match[2];
   pcre *regexp = pcre_compile(URL_REGEX, PCRE_CASELESS, &regex_errmsg, &regex_err_offset, NULL);
   
@@ -66,19 +66,28 @@ int main(int argc, char *argv[]) {
   length = strlen(trimmed_input);
   
   /* shorten URLs */
-  if (regexp && (pcre_exec(regexp, NULL, trimmed_input, length, 0, 0, match, 2) >= 0)) {
-    url = malloc((match[1] - match[0] + 1)*sizeof(char));
-    strncpy(url, trimmed_input + match[0], (match[1] - match[0])*sizeof(char));
+  regex_match_offset = 0;
+  regex_result = pcre_exec(regexp, NULL, trimmed_input, length, regex_match_offset, PCRE_NOTEMPTY, match, 2);
+  while (regexp && regex_result >= 0) {
+    url_length = match[1] - match[0];
+    url = calloc(url_length + 1, sizeof(char));
+    strncpy(url, trimmed_input + match[0], url_length*sizeof(char));
+    regex_match_offset = match[1];
+    
     shortened_url = shorten_url(url);
     shortened_url_length = strlen(shortened_url);
     
-    if (shortened_url_length < (match[1] - match[0])) { // only use shortened URL if it's actually shorter
+    if (shortened_url_length < url_length) { // only use shortened URL if it's actually shorter
       strcpy(trimmed_input + match[0], shortened_url); // copy shortened url into place
       strcpy(trimmed_input + match[0] + shortened_url_length, trimmed_input + match[1]); // copy chars after URL
+      length = length - url_length + shortened_url_length;
+      regex_match_offset = regex_match_offset - url_length + shortened_url_length;
     }
     
     free(url);
-    free(shortened_url);  
+    free(shortened_url);
+    
+    regex_result = pcre_exec(regexp, NULL, trimmed_input, length, regex_match_offset, PCRE_NOTEMPTY, match, 2);  
   }
   
   if (regexp)
