@@ -61,6 +61,19 @@ int main(int argc, char *argv[]) {
                       "will be read from standard input.\n");
   }
   
+  /* load configuration */
+  cfg = parse_config();
+  
+  if(!cfg) {
+    if (argc < 2) free(input);
+    COMPLAIN_AND_EXIT("Error: Could not load or parse configuration. Make sure that the " \
+                      "configuration file exists, is readable and contains the necessary " \
+                      "information (see the README for more information).\n");
+  }
+  
+  SNPRINTF(userpwd, USERPWD_LENGTH, "%s:%s", cfg->username, cfg->password);
+  free(cfg);
+  
   /* remove leading/trailing whitespace from input */
   trimmed_input = trim(input); 
   length = strlen(trimmed_input);
@@ -102,18 +115,7 @@ int main(int argc, char *argv[]) {
   SNPRINTF(data, DATA_LENGTH, "%s%s", "status=", url_encoded_status);
   free(url_encoded_status);
   if (argc < 2) free(input);
-  
-  /* load configuration */
-  cfg = parse_config();
-  
-  if(!cfg)
-    COMPLAIN_AND_EXIT("Error: Could not load or parse configuration. Make sure that the " \
-                      "configuration file exists, is readable and contains the necessary " \
-                      "information (see the README for more information).\n");
-  
-  SNPRINTF(userpwd, USERPWD_LENGTH, "%s:%s", cfg->username, cfg->password);
-  free(cfg);
-  
+
   /* send update */
   curl = curl_easy_init();
   
