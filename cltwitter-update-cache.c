@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
       cache_space -= length;
       if (cache_space <= 0) {
         old_cache_size = cache_size;
-        cache_size = (cache_size*2 > (cache_size + length)) ? cache_size*2 : (cache_size + length);
+        cache_size = MAX(cache_size*2, cache_size + length);
         cache_space = cache_space + (cache_size - old_cache_size);
         
         new_cache_data = realloc(cache_data, cache_size);

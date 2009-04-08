@@ -23,24 +23,24 @@ along with cltwitter.  If not, see <http://www.gnu.org/licenses/>.
 
 xmlXPathObjectPtr eval_xpath(xmlDocPtr doc, xmlChar* xpath) {
   xmlXPathContextPtr context;
-	xmlXPathObjectPtr result;
+  xmlXPathObjectPtr result;
 
-	context = xmlXPathNewContext(doc);
-	if (context == NULL) {
-		return NULL;
-	}
-	
-	result = xmlXPathEvalExpression(xpath, context);
-	xmlXPathFreeContext(context);
-	if (result == NULL) {
-		return NULL;
-	}
-	
-	if(xmlXPathNodeSetIsEmpty(result->nodesetval)){
-		xmlXPathFreeObject(result);
-		return NULL;
-	}
-	
-	return result;
+  context = xmlXPathNewContext(doc);
+  if (context == NULL) {
+    return NULL;
+  }
+  
+  result = xmlXPathEvalExpression(xpath, context);
+  xmlXPathFreeContext(context);
+  if (result == NULL) {
+    return NULL;
+  }
+  
+  if(xmlXPathNodeSetIsEmpty(result->nodesetval)){
+      xmlXPathFreeObject(result);
+    return NULL;
+  }
+  
+  return result;
 
 }

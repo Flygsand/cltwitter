@@ -48,10 +48,10 @@ along with cltwitter.  If not, see <http://www.gnu.org/licenses/>.
 #define DATA_LENGTH 3*MAX_MESSAGE_LENGTH + 8
 #define USERPWD_LENGTH 2*MAX_USERNAME_PWD_LENGTH + 2
 
-#define S(X) STRINGIFY(X)
-#define STRINGIFY(X) #X
-
+#define S(x) STRINGIFY(x)
+#define STRINGIFY(x) #x
 #define COMPLAIN_AND_EXIT(FORMAT, ...) { fprintf(stderr, FORMAT, ##__VA_ARGS__); exit(-1); }
+#define MAX(a, b) ( ((a) > (b)) ? (a) : (b) )
 
 #define TRUE 1
 #define FALSE 0

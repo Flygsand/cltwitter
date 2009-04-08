@@ -32,6 +32,7 @@ along with cltwitter.  If not, see <http://www.gnu.org/licenses/>.
 typedef struct {
   char* memory;
   size_t size;
+  size_t capacity;
 } memory;
 
 size_t ignore_data(void*, size_t, size_t, void*);

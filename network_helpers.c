@@ -34,8 +34,13 @@ size_t ignore_data(void *ptr, size_t size, size_t nmemb, void *stream) {
 
 size_t write_to_memory(void* ptr, size_t size, size_t nmemb, void* data) {
   size_t realsize = size*nmemb;
+  
   memory* mem = (memory*)data;
-  mem->memory = my_realloc(mem->memory, mem->size + realsize + 1); // TODO: inefficient allocation
+  if (realsize + 1 > mem->capacity - mem->size) {
+    mem->capacity = MAX(mem->capacity*2, mem->size + realsize + 1);
+    mem->memory = my_realloc(mem->memory, mem->capacity);
+  }
+
   if (mem->memory) { // my_realloc succeeded
     memcpy(&(mem->memory[mem->size]), ptr, realsize);
     mem->size += realsize;
