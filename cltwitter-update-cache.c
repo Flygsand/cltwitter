@@ -130,10 +130,10 @@ int main(int argc, char *argv[]) {
       
       if (i == 0) {
         strncpy(cache_ptr, screen_name, length - 1);
-        cache_ptr += (length-2)*sizeof(char);
+        cache_ptr += length-2;
       } else {
         SNPRINTF(cache_ptr, length, " %s", screen_name);
-        cache_ptr += (length-1)*sizeof(char);
+        cache_ptr += length-1;
       }
       
       free(screen_name);    

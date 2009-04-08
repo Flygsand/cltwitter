@@ -53,7 +53,7 @@ char *shorten_url(char *url) {
   unsigned long response_code;
   memory response_data = {NULL, 0};
   
-  is_gd_url = malloc(size*sizeof(char));
+  is_gd_url = malloc(size);
   SNPRINTF(is_gd_url, size, "%s%s", IS_GD_API, url_encoded_url);
   free(url_encoded_url);
   

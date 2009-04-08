@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
   while (regexp && regex_result >= 0) {
     url_length = match[1] - match[0];
     url = calloc(url_length + 1, sizeof(char));
-    strncpy(url, trimmed_input + match[0], url_length*sizeof(char));
+    strncpy(url, trimmed_input + match[0], url_length);
     regex_match_offset = match[1];
     
     shortened_url = shorten_url(url);
