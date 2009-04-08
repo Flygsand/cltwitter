@@ -13,10 +13,15 @@ cltwitter-update-cache: definitions.h application_helpers.c string_io_helpers.c 
 clean: 
 	rm -f tweet cltwitter-update-cache
 
-install:
-	cp tweet cltwitter-update-cache $(INSTALLDIR);
-	mkdir -p /etc/cltwitter;
-	cp completion/completion.bash /etc/cltwitter;
+install: install_tweet install_completion
+
+install_tweet:
+	cp tweet $(INSTALLDIR)
+
+install_completion:
+	cp cltwitter-update-cache $(INSTALLDIR)
+	mkdir -p /etc/cltwitter
+	cp completion/completion.bash /etc/cltwitter
 	@echo
 	@echo "=========================================================="
 	@echo "Installation done!"
