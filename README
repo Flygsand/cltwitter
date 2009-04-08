@@ -6,11 +6,18 @@ DEPENDENCIES)
 =============
  - libcurl
  - libpcre
+ - libxml (when compiled with tab-completion)
  
 INSTALLATION)
 =============
 *NIX:
   make && sudo make install
+  NOTE: Bash users will want to add the line "source /etc/cltwitter/completion.bash" to
+        their .bashrc or .bash_profile to enable tab completion for @replies.
+
+  If you're not using Bash, there's no point in installing the facilities for tab completion.
+  In this case, run 'make tweet && sudo make install_tweet' instead to only install the
+  Twitter client. This will hopefully be handled by a configure script in the future. 
 
 Windows:
   Binary: Download latest here: http://io.thesmilingpenguin.com/cltwitter/tweet.exe
