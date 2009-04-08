@@ -14,10 +14,13 @@
 #endif
 
 #define VERSION "20090406"
+#define USERAGENT_HEADER "cltwitter (" VERSION ")"
 #define CONFIG_FILENAME ".cltwitter"
+#define CACHE_FILENAME ".cltwitter_users.cache"
 #define MAX_MESSAGE_LENGTH 140
 #define MAX_USERNAME_PWD_LENGTH 100
 #define TWITTER_UPDATE_URL "http://twitter.com/statuses/update.xml"
+#define TWITTER_FRIENDS_URL "http://twitter.com/statuses/friends.xml"
 #define IS_GD_API "http://is.gd/api.php?longurl="
 #define URL_REGEX "\\b(\?:(\?:https\?|ftp|file)://|www\\.|ftp\\.)(\?:\\([-A-Z0-9+&@#/%=~_|$\?!:,.]*\\)|[-A-Z0-9+&@#/%=~_|$\?!:,.])*(\?:\\([-A-Z0-9+&@#/%=~_|$\?!:,.]*\\)|[A-Z0-9+&@#/%=~_|$])"
 
@@ -44,5 +47,10 @@ enum http_response_code {
   BAD_GATEWAY = 502,
   SERVICE_UNAVAILABLE = 503
 };
+
+typedef struct { 
+  char username[MAX_USERNAME_PWD_LENGTH];
+  char password[MAX_USERNAME_PWD_LENGTH];
+} config;
 
 #endif /* DEFINITIONS_H */

@@ -26,15 +26,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <curl/curl.h>
 #include <pcre.h>
+#include "application_helpers.h"
 #include "network_helpers.h"
 #include "string_io_helpers.h"
-
-typedef struct { 
-  char username[MAX_USERNAME_PWD_LENGTH];
-  char password[MAX_USERNAME_PWD_LENGTH];
-} config;
-
-config *parse_config(void);
 
 int main(int argc, char *argv[]) {
   size_t length = 0, url_length = 0, shortened_url_length = 0;
@@ -121,7 +115,7 @@ int main(int argc, char *argv[]) {
   
   if (curl) {  
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, ignore_data);
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "cltwitter (" VERSION ")");
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, USERAGENT_HEADER);
     curl_easy_setopt(curl, CURLOPT_URL, TWITTER_UPDATE_URL);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
     curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
@@ -138,52 +132,4 @@ int main(int argc, char *argv[]) {
   }
   
   return 0;
-}
-
-config *parse_config() {
-  char *cfg_dir = getenv(HOME);
-  size_t size = strlen(cfg_dir) + strlen(CONFIG_FILENAME) + 2; // '/' + '\0'
-  char *cfg_path = malloc(size);
-  FILE *fp; 
-  config *cfg;
-  
-  if (cfg_dir) {
-    SNPRINTF(cfg_path, size, "%s%s%s", cfg_dir, DS, CONFIG_FILENAME);
-  } else {
-    free(cfg_path);
-    return NULL;
-  }
-  
-  fp = fopen(cfg_path, "r");
-  cfg = malloc(sizeof(config));
-  
-  if (fp && cfg) {    
-    char line[1024];
-    bool has_username, has_password;
-    has_username = has_password = FALSE;
-    while (fgets(line, sizeof line, fp) != NULL) {
-      if (sscanf(line, "username=%" S(MAX_USERNAME_PWD_LENGTH) "s", cfg->username))
-        has_username = TRUE;
-      if(sscanf(line, "password=%" S(MAX_USERNAME_PWD_LENGTH) "s", cfg->password))
-        has_password = TRUE;
-    }
-    
-    free(cfg_path);
-    fclose(fp);
-    
-    if (!(has_username && has_password)) {
-      free(cfg);
-      return NULL;
-    }
-    
-    return cfg;
-  } else {
-    if (fp)
-      fclose(fp);
-    if (cfg)
-      free(cfg);
-      
-    free(cfg_path);
-    return NULL;
-  }
 }

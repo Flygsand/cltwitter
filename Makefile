@@ -1,15 +1,28 @@
 CC = gcc
 CFLAGS = -Wall
-PROG = tweet
-LIBS = -lcurl -lpcre
-SRCS = definitions.h network_helpers.c string_io_helpers.c tweet.c
 INSTALLDIR = /usr/bin
 
-$(PROG): $(SRCS)
-	$(CC) $(CFLAGS) -o $(PROG) $(SRCS) $(LIBS)
+all: tweet cltwitter-update-cache
 
+tweet: definitions.h application_helpers.c network_helpers.c string_io_helpers.c tweet.c
+	$(CC) $(CFLAGS) -o tweet -lcurl -lpcre definitions.h application_helpers.c string_io_helpers.c network_helpers.c tweet.c
+
+cltwitter-update-cache: definitions.h application_helpers.c network_helpers.c xml_helpers.c cltwitter-update-cache.c
+	$(CC) $(CFLAGS) -o cltwitter-update-cache -lcurl -lxml2 definitions.h application_helpers.c string_io_helpers.c network_helpers.c xml_helpers.c cltwitter-update-cache.c
+  
 clean: 
-	rm -f $(PROG)
+	rm -f tweet cltwitter-update-cache
 
 install:
-	cp $(PROG) $(INSTALLDIR)
+	cp tweet cltwitter-update-cache $(INSTALLDIR);
+	mkdir -p /etc/cltwitter;
+	cp completion/completion.bash /etc/cltwitter;
+	@echo
+	@echo "=========================================================="
+	@echo "Installation done! Please add the following to your"
+	@echo ".bashrc or .bash_profile:"
+	@echo
+	@echo "  source /etc/cltwitter/completion.bash"
+	@echo
+	@echo "to enable TAB-completion for Twitter replies."
+	@echo "=========================================================="
