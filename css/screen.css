@@ -22,4 +22,4 @@ a:hover, #post a:hover { border-bottom: 2px solid #cc0000; }
 #home { padding-left: 2em; }
 #codes strong, #post .meta  { color: lightgray; }
 #post { margin-left: auto; margin-right: auto; }
-#post pre { background-color:#444444; line-height: 1.5em; padding: 0 0.4em; }
+pre, .terminal { background-color:#444444; line-height: 1.5em; padding: 0 0.4em; }
