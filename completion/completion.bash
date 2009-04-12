@@ -17,4 +17,4 @@ __cltwitter_complete () {
  
 }
 
-complete -F __cltwitter_complete tweet
+complete -F __cltwitter_complete -o default tweet

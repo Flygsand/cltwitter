@@ -6,7 +6,7 @@ DEPENDENCIES)
 =============
  - libcurl
  - libpcre
- - libxml (when compiled with tab-completion)
+ - libxml2
  
 INSTALLATION)
 =============
@@ -20,9 +20,10 @@ INSTALLATION)
   Twitter client. This will hopefully be handled by a configure script in the future. 
 
 Windows:
-  Binary: Download latest here: http://io.thesmilingpenguin.com/cltwitter/tweet.exe
+  Binary: Download "latest" here: http://io.thesmilingpenguin.com/cltwitter/tweet.exe
           Copy it to C:\Windows or C:\Windows\system32 (or any other place that is in your
-          PATH).
+          PATH). Note that "latest" may actually be far behind the HEAD of the master and
+          thus lack features.
 
 CONFIGURATION)
 ==============
@@ -59,4 +60,15 @@ Supplying Twitter message on the command line:
 Tweeting a random fortune cookie:
   fortune | tweet
 
+Using the tab-completion feature:
+  tweet "@s<TAB>
+  @sourcebits @spolsky
+
+Tweeting a picture to Twitpic:
+  tweet "An image says more than a thousand tweets." ~/images/birdhouse.jpg
+
+NOTES)
+======
 In accordance with Twitter regulations, the supplied message must be 1-140 characters long. 
+
+HAPPY TWEETING!

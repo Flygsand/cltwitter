@@ -34,7 +34,7 @@ along with cltwitter.  If not, see <http://www.gnu.org/licenses/>.
   #define DS "/"
 #endif
 
-#define VERSION "20090406"
+#define VERSION "20090412"
 #define USERAGENT_HEADER "cltwitter (" VERSION ")"
 #define CONFIG_FILENAME ".cltwitter"
 #define CACHE_FILENAME ".cltwitter_users.cache"
@@ -42,6 +42,7 @@ along with cltwitter.  If not, see <http://www.gnu.org/licenses/>.
 #define MAX_USERNAME_PWD_LENGTH 100
 #define TWITTER_UPDATE_URL "http://twitter.com/statuses/update.xml"
 #define TWITTER_FRIENDS_URL "http://twitter.com/statuses/friends.xml"
+#define TWITPIC_POST_URL "https://twitpic.com/api/uploadAndPost"
 #define IS_GD_API "http://is.gd/api.php?longurl="
 #define URL_REGEX "\\b(\?:(\?:https\?|ftp|file)://|www\\.|ftp\\.)(\?:\\([-A-Z0-9+&@#/%=~_|$\?!:,.]*\\)|[-A-Z0-9+&@#/%=~_|$\?!:,.])*(\?:\\([-A-Z0-9+&@#/%=~_|$\?!:,.]*\\)|[A-Z0-9+&@#/%=~_|$])"
 
@@ -68,6 +69,9 @@ enum http_response_code {
   BAD_GATEWAY = 502,
   SERVICE_UNAVAILABLE = 503
 };
+
+enum cltwitter_modes { CLTWITTER_STDIN, CLTWITTER_ARG, CLTWITTER_TWITPIC };
+typedef enum cltwitter_modes cltwitter_mode;
 
 typedef struct { 
   char username[MAX_USERNAME_PWD_LENGTH];
