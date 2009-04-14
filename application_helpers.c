@@ -21,6 +21,17 @@ along with cltwitter.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "application_helpers.h"
 
+int find_flag(char *flag, int argc, char *argv[]) {
+  int pos;
+  
+  for (pos = 1; pos < argc; pos++) {
+    if (strcmp(flag, argv[pos]) == 0) 
+      return pos;
+  }
+  
+  return -1;
+}
+
 char *get_absolute_path(const char* filename) {
   char *cfg_path, *cfg_dir = getenv(HOME);
   size_t size;

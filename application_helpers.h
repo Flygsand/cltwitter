@@ -26,6 +26,7 @@ along with cltwitter.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <string.h>
 
+int find_flag(char*, int, char**);
 char *get_absolute_path(const char*);
 config *parse_config(void);
 

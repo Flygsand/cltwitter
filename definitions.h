@@ -34,7 +34,7 @@ along with cltwitter.  If not, see <http://www.gnu.org/licenses/>.
   #define DS "/"
 #endif
 
-#define VERSION "20090412"
+#define VERSION "20090414"
 #define USERAGENT_HEADER "cltwitter (" VERSION ")"
 #define CONFIG_FILENAME ".cltwitter"
 #define CACHE_FILENAME ".cltwitter_users.cache"
@@ -42,18 +42,18 @@ along with cltwitter.  If not, see <http://www.gnu.org/licenses/>.
 #define MAX_USERNAME_PWD_LENGTH 100
 #define TWITTER_UPDATE_URL "http://twitter.com/statuses/update.xml"
 #define TWITTER_FRIENDS_URL "http://twitter.com/statuses/friends.xml"
+#define TWITPIC_UPLOAD_URL "https://twitpic.com/api/upload"
 #define TWITPIC_POST_URL "https://twitpic.com/api/uploadAndPost"
 #define IS_GD_API "http://is.gd/api.php?longurl="
 #define URL_REGEX "\\b(\?:(\?:https\?|ftp|file)://|www\\.|ftp\\.)(\?:\\([-A-Z0-9+&@#/%=~_|$\?!:,.]*\\)|[-A-Z0-9+&@#/%=~_|$\?!:,.])*(\?:\\([-A-Z0-9+&@#/%=~_|$\?!:,.]*\\)|[A-Z0-9+&@#/%=~_|$])"
+#define UPLOAD_ONLY_FLAG "--upload-only"
 
 #define DATA_LENGTH 3*MAX_MESSAGE_LENGTH + 8
 #define USERPWD_LENGTH 2*MAX_USERNAME_PWD_LENGTH + 2
-
 #define S(x) STRINGIFY(x)
 #define STRINGIFY(x) #x
 #define COMPLAIN_AND_EXIT(FORMAT, ...) { fprintf(stderr, FORMAT, ##__VA_ARGS__); exit(-1); }
 #define MAX(a, b) ( ((a) > (b)) ? (a) : (b) )
-
 #define TRUE 1
 #define FALSE 0
 typedef unsigned char bool;
@@ -70,7 +70,7 @@ enum http_response_code {
   SERVICE_UNAVAILABLE = 503
 };
 
-enum cltwitter_modes { CLTWITTER_STDIN, CLTWITTER_ARG, CLTWITTER_TWITPIC };
+enum cltwitter_modes { CLTWITTER_STDIN, CLTWITTER_ARG, CLTWITTER_TWITPIC, CLTWITTER_TWITPIC_UPLOAD_ONLY };
 typedef enum cltwitter_modes cltwitter_mode;
 
 typedef struct { 

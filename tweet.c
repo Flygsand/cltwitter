@@ -50,18 +50,27 @@ int main(int argc, char *argv[]) {
   xmlDocPtr doc;
   xmlXPathObjectPtr xpath_result;
   memory twitpic_xml = {NULL, 0};
+  int upload_only_flag_position = find_flag(UPLOAD_ONLY_FLAG, argc, argv);
   
-  /* determine operation mode */ 
-  if (argc < 2) {
+  /* parse command line arguments */
+  if (
+    (upload_only_flag_position > 0 && upload_only_flag_position < 3)
+    || (argc == 4 && upload_only_flag_position == -1)
+    || argc > 4) {
+    COMPLAIN_AND_EXIT("cltwitter, version " VERSION "\nUsage: tweet [message [image_path [--upload-only]]]" \
+                      "\n\nExplanation:\n" \
+                      "message - the message to be posted to Twitter. Messages containing spaces must be quoted.\n" \
+                      "image_path - specifies the path to an image on the local filesystem that will be uploaded to Twitpic.\n" \
+                      "--upload-only - upload image to Twitpic, but do not post to Twitter. Only valid if image_path is given.\n" \
+                      "\nIf no arguments are given, the message argument will be read from standard input.\n");
+  } else if (argc < 2) {
     mode = CLTWITTER_STDIN;
   } else if (argc == 2) {
     mode = CLTWITTER_ARG;
   } else if (argc == 3) {
     mode = CLTWITTER_TWITPIC;
-  } else {
-    COMPLAIN_AND_EXIT("cltwitter, version " VERSION "\nUsage: tweet [message]\nNOTE: Make sure " \
-                      "that [message] is surrounded by quotes. If [message] is not given, data " \
-                      "will be read from standard input.\n");
+  } else if (argc == 4 && upload_only_flag_position == 3) {
+    mode = CLTWITTER_TWITPIC_UPLOAD_ONLY;
   }
   
   /* load configuration */
@@ -76,6 +85,7 @@ int main(int argc, char *argv[]) {
   switch(mode) {
     case CLTWITTER_STDIN:   input = get_line(stdin); break;
     case CLTWITTER_TWITPIC:
+    case CLTWITTER_TWITPIC_UPLOAD_ONLY:
     case CLTWITTER_ARG:     input = argv[1];
   }
   
@@ -133,13 +143,17 @@ int main(int argc, char *argv[]) {
   
   curl_easy_setopt(curl, CURLOPT_USERAGENT, USERAGENT_HEADER); 
     
-  if (mode == CLTWITTER_TWITPIC) {
+  if (mode == CLTWITTER_TWITPIC || mode == CLTWITTER_TWITPIC_UPLOAD_ONLY) {
     curl_formadd(&post, &last, CURLFORM_COPYNAME, "media", CURLFORM_FILE, argv[2], CURLFORM_END);
     curl_formadd(&post, &last, CURLFORM_COPYNAME, "message", CURLFORM_PTRCONTENTS, trimmed_input, CURLFORM_END);
     curl_formadd(&post, &last, CURLFORM_COPYNAME, "username", CURLFORM_PTRCONTENTS, cfg->username, CURLFORM_END);
     curl_formadd(&post, &last, CURLFORM_COPYNAME, "password", CURLFORM_PTRCONTENTS, cfg->password, CURLFORM_END);
 
-    curl_easy_setopt(curl, CURLOPT_URL, TWITPIC_POST_URL);
+    if (mode == CLTWITTER_TWITPIC_UPLOAD_ONLY)
+      curl_easy_setopt(curl, CURLOPT_URL, TWITPIC_UPLOAD_URL);
+    else
+      curl_easy_setopt(curl, CURLOPT_URL, TWITPIC_POST_URL);
+    
     curl_easy_setopt(curl, CURLOPT_HTTPPOST, post);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_to_memory);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &twitpic_xml);
