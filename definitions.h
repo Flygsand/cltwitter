@@ -37,14 +37,22 @@ along with cltwitter.  If not, see <http://www.gnu.org/licenses/>.
 #define VERSION "20090414"
 #define USERAGENT_HEADER "cltwitter (" VERSION ")"
 #define CONFIG_FILENAME ".cltwitter"
+#define TOKEN_FILENAME ".cltwitter.token"
 #define CACHE_FILENAME ".cltwitter_users.cache"
 #define MAX_MESSAGE_LENGTH 140
 #define MAX_USERNAME_PWD_LENGTH 100
+#define MAX_TOKEN_LENGTH 400
 #define TWITTER_UPDATE_URL "http://twitter.com/statuses/update.xml"
 #define TWITTER_FRIENDS_URL "http://twitter.com/statuses/friends.xml"
 #define TWITPIC_UPLOAD_URL "https://twitpic.com/api/upload"
 #define TWITPIC_POST_URL "https://twitpic.com/api/uploadAndPost"
 #define IS_GD_API "http://is.gd/api.php?longurl="
+#define OAUTH_REQUEST_TOKEN_URL "http://twitter.com/oauth/request_token"
+#define OAUTH_AUTHORIZE_URL "http://twitter.com/oauth/authorize"
+#define OAUTH_ACCESS_TOKEN_URL "http://twitter.com/oauth/access_token"
+#define OAUTH_CONSUMER_KEY "WG2hFcojXoow3UU2b08RKw"
+#define OAUTH_CONSUMER_SECRET "ApMLHEX1sFQiIK5VsoyC1AA0MQc4EfGK5vB4Q1J8o"
+
 #define URL_REGEX "\\b(\?:(\?:https\?|ftp|file)://|www\\.|ftp\\.)(\?:\\([-A-Z0-9+&@#/%=~_|$\?!:,.]*\\)|[-A-Z0-9+&@#/%=~_|$\?!:,.])*(\?:\\([-A-Z0-9+&@#/%=~_|$\?!:,.]*\\)|[A-Z0-9+&@#/%=~_|$])"
 #define UPLOAD_ONLY_FLAG "--upload-only"
 
@@ -77,5 +85,10 @@ typedef struct {
   char username[MAX_USERNAME_PWD_LENGTH];
   char password[MAX_USERNAME_PWD_LENGTH];
 } config;
+
+typedef struct { 
+  char *key;
+  char *secret;
+} token;
 
 #endif /* DEFINITIONS_H */

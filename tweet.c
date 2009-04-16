@@ -38,8 +38,9 @@ int main(int argc, char *argv[]) {
   cltwitter_mode mode;
   size_t length = 0, url_length = 0, shortened_url_length = 0;
   char *input, *trimmed_input, *url, *shortened_url, *url_encoded_status, *err_msg, 
-       data[DATA_LENGTH], userpwd[USERPWD_LENGTH];
-  config *cfg;
+       data[DATA_LENGTH], *signed_update_url;
+  config *cfg = NULL;
+  token *tok = NULL;
   CURL *curl;
   CURLcode res;
   struct curl_httppost *post = NULL, *last = NULL;
@@ -65,28 +66,33 @@ int main(int argc, char *argv[]) {
                       "\nIf no arguments are given, the message argument will be read from standard input.\n");
   } else if (argc < 2) {
     mode = CLTWITTER_STDIN;
+    input = get_line(stdin);
+    tok = get_access_token();
   } else if (argc == 2) {
     mode = CLTWITTER_ARG;
+    input = argv[1];
+    tok = get_access_token();
   } else if (argc == 3) {
     mode = CLTWITTER_TWITPIC;
+    input = argv[1];
+    cfg = parse_config();
   } else if (argc == 4 && upload_only_flag_position == 3) {
     mode = CLTWITTER_TWITPIC_UPLOAD_ONLY;
+    input = argv[1];
+    cfg = parse_config();
   }
   
   /* load configuration */
-  cfg = parse_config();
+  if((mode == CLTWITTER_STDIN || mode == CLTWITTER_ARG) && !tok) {
+    if (mode == CLTWITTER_STDIN) free(input);
+    COMPLAIN_AND_EXIT("Error: Failed to get OAuth access token. Make sure that you provided the correct credentials.\n");
+  }
   
-  if(!cfg)
+   /* load configuration */
+  if((mode == CLTWITTER_TWITPIC || mode == CLTWITTER_TWITPIC_UPLOAD_ONLY) && !cfg) {
     COMPLAIN_AND_EXIT("Error: Could not load or parse configuration. Make sure that the " \
                       "configuration file exists, is readable and contains the necessary " \
                       "information (see the README for more information).\n");
-  
-  /* read input */
-  switch(mode) {
-    case CLTWITTER_STDIN:   input = get_line(stdin); break;
-    case CLTWITTER_TWITPIC:
-    case CLTWITTER_TWITPIC_UPLOAD_ONLY:
-    case CLTWITTER_ARG:     input = argv[1];
   }
   
   /* remove leading/trailing whitespace from input */
@@ -129,7 +135,8 @@ int main(int argc, char *argv[]) {
   
   /* check message length */
   if (length == 0 || length > MAX_MESSAGE_LENGTH) {
-    free(cfg);
+    if (tok) free(tok);
+    if (cfg) free(cfg);
     COMPLAIN_AND_EXIT("Error: Message must be between 1 and " S(MAX_MESSAGE_LENGTH) " characters long.\n");
   }
   
@@ -137,7 +144,8 @@ int main(int argc, char *argv[]) {
   curl = curl_easy_init();
   
   if (!curl) {
-    free(cfg);
+    if (tok) free(tok);
+    if (cfg) free(cfg);
     COMPLAIN_AND_EXIT("Error: Couldn't init connection mechanism. Tweet not sent.\n");
   }
   
@@ -202,18 +210,21 @@ int main(int argc, char *argv[]) {
     
     if (mode == CLTWITTER_STDIN) free(input);
     
-    SNPRINTF(userpwd, USERPWD_LENGTH, "%s:%s", cfg->username, cfg->password);
-    free(cfg);
-     
+    signed_update_url = oauth_sign_url(TWITTER_UPDATE_URL, NULL, OA_HMAC, OAUTH_CONSUMER_KEY, OAUTH_CONSUMER_SECRET, tok->key, tok->secret);
+    free(tok);
+    printf("URL: %s\n", signed_update_url);
+    
+    if (!signed_update_url) { curl_easy_cleanup(curl); COMPLAIN_AND_EXIT("Error: Signing of OAuth request URL failed. Tweet not sent.\n"); } 
+    
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, ignore_data);
-    curl_easy_setopt(curl, CURLOPT_URL, TWITTER_UPDATE_URL);
+    curl_easy_setopt(curl, CURLOPT_URL, signed_update_url);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
-    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-    curl_easy_setopt(curl, CURLOPT_USERPWD, userpwd);
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, USERAGENT_HEADER);
     
     res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
     curl_easy_cleanup(curl);
+    free(signed_update_url);
     if (res != CURLE_OK)
       COMPLAIN_AND_EXIT("(Twitter) Error: %s\n", curl_easy_strerror(res));
     if (!(response_code == OK || response_code == NOT_MODIFIED))

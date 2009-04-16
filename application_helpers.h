@@ -25,9 +25,12 @@ along with cltwitter.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <oauth.h>
 
 int find_flag(char*, int, char**);
 char *get_absolute_path(const char*);
+char *get_browser_cmd();
+token *get_access_token(void);
 config *parse_config(void);
 
 #endif /* APPLICATION_HELPERS_H */
