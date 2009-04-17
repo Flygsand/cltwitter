@@ -46,6 +46,9 @@ char *get_absolute_path(const char* filename) {
 }
 
 char *get_browser_cmd(char *url) {
+  #ifdef _WIN32
+    return NULL;
+  #else
   const int browserc = 3;
   const size_t cmd_len = 64;
   char *browsers[] = {"firefox", "opera", "safari"};
@@ -65,7 +68,7 @@ char *get_browser_cmd(char *url) {
   
   free(cmd);
   return NULL; 
-  
+  #endif
 }
 
 int parse_reply(const char *reply, char **token, char **secret) {
@@ -87,10 +90,13 @@ int parse_reply(const char *reply, char **token, char **secret) {
 
 token *get_access_token() {
   char *token_path = get_absolute_path(TOKEN_FILENAME), *req_url = NULL, *reply = NULL, line[1024], c,
-        *authorize_url, *browser, *file_data, *t_key = NULL, *t_secret = NULL;
+        *authorize_url, *browser, *file_data, *postargs = NULL, *t_key = NULL, *t_secret = NULL;
   bool has_access_token_key, has_access_token_secret;
   FILE *fp; 
   token *tok;
+  #ifndef _WIN32
+    mode_t old_umask;
+  #endif
   
   if (!token_path)
     return NULL;
@@ -109,8 +115,6 @@ token *get_access_token() {
         has_access_token_secret = TRUE;
     }
     
-    printf("key: %s, secret: %s\n", tok->key, tok->secret);
-    
     free(token_path);
     fclose(fp);
     
@@ -120,13 +124,14 @@ token *get_access_token() {
     
     return tok;
   } else {
-    req_url = oauth_sign_url(OAUTH_REQUEST_TOKEN_URL, NULL, OA_HMAC, OAUTH_CONSUMER_KEY, OAUTH_CONSUMER_SECRET, NULL, NULL);
+    req_url = oauth_sign_url(OAUTH_REQUEST_TOKEN_URL, &postargs, OA_HMAC, OAUTH_CONSUMER_KEY, consumer_secret(), NULL, NULL);
     
     if (!req_url) {
       free(token_path); return NULL;
     }
     
-    reply = oauth_http_get(req_url, NULL);
+    reply = oauth_http_post(req_url, postargs);
+    if (postargs) free(postargs);
     free(req_url);
     if (parse_reply(reply, &t_key, &t_secret)) { free(token_path); return NULL; }
     free(reply);
@@ -136,26 +141,30 @@ token *get_access_token() {
     
     SNPRINTF(authorize_url, 1024, S(OAUTH_AUTHORIZE_URL) "?oauth_token=%s", t_key);
     browser = get_browser_cmd(authorize_url);
-    printf("Authorization required (only first time)\n");
+    printf("You need to allow cltwitter access to your Twitter profile. You will only need to do " \
+           "this once. cltwitter will now try to open your browser and point you to Twitter's " \
+           "authorization process. After you're done, press ENTER to continue.\n");
+           
     if (!browser) {
-      printf("Could not detect your browser. Please visit this URL in your browser to authenticate: %s\n", authorize_url);
+      printf("\nNotice: Could not detect your browser. Please go to this URL to complete the process: %s\n", authorize_url);
     } else {
       system(browser);
       free(browser);
     }
-    free(authorize_url);
     
-    printf("After you've authenticated, press ENTER to continue\n");
+    free(authorize_url);
+
     while((c = getchar()) != '\n' && c != EOF) ;
     
-    req_url = oauth_sign_url(OAUTH_ACCESS_TOKEN_URL, NULL, OA_HMAC, OAUTH_CONSUMER_KEY, OAUTH_CONSUMER_SECRET, t_key, t_secret);  // segfault?
+    req_url = oauth_sign_url(OAUTH_ACCESS_TOKEN_URL, &postargs, OA_HMAC, OAUTH_CONSUMER_KEY, consumer_secret(), t_key, t_secret);  // segfault?
     
     if (!req_url) { free(token_path); return NULL; }
     
-    reply = oauth_http_get(req_url, NULL);
+    reply = oauth_http_post(req_url, postargs);
+    free(req_url);
     if(t_key) free(t_key);
     if(t_secret) free(t_secret);
-    if (req_url) free(req_url);
+    if (postargs) free(postargs);
     if (!reply) { free(token_path); return NULL; }
     
     tok = malloc(sizeof(token));
@@ -163,7 +172,16 @@ token *get_access_token() {
     if (parse_reply(reply, &tok->key, &tok->secret)) { free(token_path); free(reply); free(tok); return NULL; }
     free(reply);
     
+    #ifndef _WIN32
+      old_umask = umask(077);
+    #endif
+    
     fp = fopen(token_path, "w");
+    
+    #ifndef _WIN32
+      umask(old_umask);
+    #endif
+    
     file_data = calloc(1024, sizeof(char));
     free(token_path);
     

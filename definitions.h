@@ -50,8 +50,7 @@ along with cltwitter.  If not, see <http://www.gnu.org/licenses/>.
 #define OAUTH_REQUEST_TOKEN_URL "http://twitter.com/oauth/request_token"
 #define OAUTH_AUTHORIZE_URL "http://twitter.com/oauth/authorize"
 #define OAUTH_ACCESS_TOKEN_URL "http://twitter.com/oauth/access_token"
-#define OAUTH_CONSUMER_KEY "WG2hFcojXoow3UU2b08RKw"
-#define OAUTH_CONSUMER_SECRET "ApMLHEX1sFQiIK5VsoyC1AA0MQc4EfGK5vB4Q1J8o"
+#define OAUTH_CONSUMER_KEY "vyhG9JICqOaOYHw0iTonoA"
 
 #define URL_REGEX "\\b(\?:(\?:https\?|ftp|file)://|www\\.|ftp\\.)(\?:\\([-A-Z0-9+&@#/%=~_|$\?!:,.]*\\)|[-A-Z0-9+&@#/%=~_|$\?!:,.])*(\?:\\([-A-Z0-9+&@#/%=~_|$\?!:,.]*\\)|[A-Z0-9+&@#/%=~_|$])"
 #define UPLOAD_ONLY_FLAG "--upload-only"

@@ -7,6 +7,7 @@ DEPENDENCIES)
  - libcurl
  - libpcre
  - libxml2
+ - liboauth
  
 INSTALLATION)
 =============
@@ -50,6 +51,10 @@ to white-space. As an example, "username = john" will not parse, but "username=j
 
 USAGE)
 ======
+NOTE: The first time "tweet" is invoked, you will be asked to authorize cltwitter
+access to your Twitter profile on Twitter's site. cltwitter uses the OAuth scheme 
+which eliminates the need for sending passwords over the wire.
+
 cltwitter supplies a command "tweet" for posting messages to Twitter. The command 
 accepts one argument (the message to be sent) on the command line or, if no argument
 is given, reads one line from standard input. Both usages are depicted below:

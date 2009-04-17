@@ -24,8 +24,13 @@ along with cltwitter.  If not, see <http://www.gnu.org/licenses/>.
 #include "definitions.h"
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef _WIN32
+  #include <sys/stat.h>
+  #include <sys/types.h>
+#endif
 #include <string.h>
 #include <oauth.h>
+#include "oauth_helpers.h"
 
 int find_flag(char*, int, char**);
 char *get_absolute_path(const char*);

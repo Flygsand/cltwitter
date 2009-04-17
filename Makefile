@@ -5,10 +5,10 @@ INSTALLDIR = /usr/bin
 all: tweet cltwitter-update-cache
 
 tweet: definitions.h application_helpers.c network_helpers.c string_io_helpers.c xml_helpers.c tweet.c
-	$(CC) $(CFLAGS) -o tweet -lcurl -loauth -lpcre -lxml2 definitions.h application_helpers.c string_io_helpers.c network_helpers.c xml_helpers.c tweet.c
+	$(CC) $(CFLAGS) -o tweet -lcurl -loauth -lpcre -lxml2 oauth_helpers.o definitions.h application_helpers.c string_io_helpers.c network_helpers.c xml_helpers.c tweet.c
 
 cltwitter-update-cache: definitions.h application_helpers.c string_io_helpers.c network_helpers.c xml_helpers.c cltwitter-update-cache.c
-	$(CC) $(CFLAGS) -o cltwitter-update-cache -lcurl -loauth -lxml2 definitions.h application_helpers.c string_io_helpers.c network_helpers.c xml_helpers.c cltwitter-update-cache.c
+	$(CC) $(CFLAGS) -o cltwitter-update-cache -lcurl -loauth -lxml2 oauth_helpers.o definitions.h application_helpers.c string_io_helpers.c network_helpers.c xml_helpers.c cltwitter-update-cache.c
   
 clean: 
 	rm -f tweet cltwitter-update-cache

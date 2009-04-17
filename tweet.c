@@ -32,13 +32,14 @@ along with cltwitter.  If not, see <http://www.gnu.org/licenses/>.
 #include "network_helpers.h"
 #include "string_io_helpers.h"
 #include "xml_helpers.h"
+#include "oauth_helpers.h"
 
 int main(int argc, char *argv[]) {
   /* definitions */
   cltwitter_mode mode;
-  size_t length = 0, url_length = 0, shortened_url_length = 0;
-  char *input, *trimmed_input, *url, *shortened_url, *url_encoded_status, *err_msg, 
-       data[DATA_LENGTH], *signed_update_url;
+  size_t length = 0, url_length = 0, shortened_url_length = 0, update_url_length = 0;
+  char *input, *trimmed_input, *url, *shortened_url, *err_msg, 
+        *update_url, *signed_update_url, *oauth_postargs;
   config *cfg = NULL;
   token *tok = NULL;
   CURL *curl;
@@ -204,27 +205,29 @@ int main(int argc, char *argv[]) {
     xmlCleanupParser();
     
   } else {
-    url_encoded_status = url_encode(trimmed_input);
-    SNPRINTF(data, DATA_LENGTH, "%s%s", "status=", url_encoded_status);
-    free(url_encoded_status);
+       
+    update_url_length = strlen(TWITTER_UPDATE_URL) + strlen(trimmed_input) + 9;
+    update_url = calloc(update_url_length, sizeof(char));
+    if (!update_url) { curl_easy_cleanup(curl); COMPLAIN_AND_EXIT("Error: Memory allocation error.\n"); }
     
+    SNPRINTF(update_url, update_url_length, "%s?status=%s", TWITTER_UPDATE_URL, trimmed_input);   
+    signed_update_url = oauth_sign_url(update_url, &oauth_postargs, OA_HMAC, OAUTH_CONSUMER_KEY, consumer_secret(), tok->key, tok->secret);
+    free(tok);
+    free(update_url);
     if (mode == CLTWITTER_STDIN) free(input);
     
-    signed_update_url = oauth_sign_url(TWITTER_UPDATE_URL, NULL, OA_HMAC, OAUTH_CONSUMER_KEY, OAUTH_CONSUMER_SECRET, tok->key, tok->secret);
-    free(tok);
-    printf("URL: %s\n", signed_update_url);
-    
-    if (!signed_update_url) { curl_easy_cleanup(curl); COMPLAIN_AND_EXIT("Error: Signing of OAuth request URL failed. Tweet not sent.\n"); } 
-    
+    if (!signed_update_url) { curl_easy_cleanup(curl); COMPLAIN_AND_EXIT("Error: Signing of OAuth request URL failed. Tweet not sent.\n"); }  
+
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, ignore_data);
     curl_easy_setopt(curl, CURLOPT_URL, signed_update_url);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, oauth_postargs);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, USERAGENT_HEADER);
-    
+  
     res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
     curl_easy_cleanup(curl);
     free(signed_update_url);
+    free(oauth_postargs);
     if (res != CURLE_OK)
       COMPLAIN_AND_EXIT("(Twitter) Error: %s\n", curl_easy_strerror(res));
     if (!(response_code == OK || response_code == NOT_MODIFIED))
