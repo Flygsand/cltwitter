@@ -138,7 +138,7 @@ int main(int argc, char *argv[]) {
   if (length == 0 || length > MAX_MESSAGE_LENGTH) {
     if (tok) free(tok);
     if (cfg) free(cfg);
-    COMPLAIN_AND_EXIT("Error: Message must be between 1 and " S(MAX_MESSAGE_LENGTH) " characters long.\n");
+    COMPLAIN_AND_EXIT("Error: Message must be 1-" S(MAX_MESSAGE_LENGTH) " characters long, yours was %lu.\n", (unsigned long)length);
   }
   
   /* send update */
