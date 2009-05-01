@@ -33,13 +33,14 @@ along with cltwitter.  If not, see <http://www.gnu.org/licenses/>.
 #include "string_io_helpers.h"
 #include "xml_helpers.h"
 #include "oauth_helpers.h"
+#include "oauth_secret.h"
 
 int main(int argc, char *argv[]) {
   /* definitions */
   cltwitter_mode mode;
-  size_t length = 0, url_length = 0, shortened_url_length = 0, update_url_length = 0;
+  size_t length = 0, url_length = 0, shortened_url_length = 0, oauth_postargs_length = 0;
   char *input, *trimmed_input, *url, *shortened_url, *err_msg, 
-        *update_url, *signed_update_url, *oauth_postargs;
+       *signed_update_url, *oauth_postargs;
   config *cfg = NULL;
   token *tok = NULL;
   CURL *curl;
@@ -205,18 +206,16 @@ int main(int argc, char *argv[]) {
     xmlCleanupParser();
     
   } else {
-       
-    update_url_length = strlen(TWITTER_UPDATE_URL) + strlen(trimmed_input) + 9;
-    update_url = calloc(update_url_length, sizeof(char));
-    if (!update_url) { curl_easy_cleanup(curl); COMPLAIN_AND_EXIT("Error: Memory allocation error.\n"); }
+    oauth_postargs_length = strlen(trimmed_input) + 8;
+    oauth_postargs = calloc(oauth_postargs_length, sizeof(char));
+    if (!oauth_postargs) { curl_easy_cleanup(curl); COMPLAIN_AND_EXIT("Error: Memory allocation error.\n"); }
     
-    SNPRINTF(update_url, update_url_length, "%s?status=%s", TWITTER_UPDATE_URL, trimmed_input);   
-    signed_update_url = oauth_sign_url(update_url, &oauth_postargs, OA_HMAC, OAUTH_CONSUMER_KEY, consumer_secret(), tok->key, tok->secret);
+    SNPRINTF(oauth_postargs, oauth_postargs_length, "status=%s", trimmed_input);   
+    signed_update_url = my_oauth_sign_url(TWITTER_UPDATE_URL, 1, &oauth_postargs, OA_HMAC, OAUTH_CONSUMER_KEY, oauth_consumer_secret(), tok->key, tok->secret);
     free(tok);
-    free(update_url);
     if (mode == CLTWITTER_STDIN) free(input);
     
-    if (!signed_update_url) { curl_easy_cleanup(curl); COMPLAIN_AND_EXIT("Error: Signing of OAuth request URL failed. Tweet not sent.\n"); }  
+    if (!signed_update_url) { free(oauth_postargs); curl_easy_cleanup(curl); COMPLAIN_AND_EXIT("Error: Signing of OAuth request URL failed. Tweet not sent.\n"); }  
 
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, ignore_data);
     curl_easy_setopt(curl, CURLOPT_URL, signed_update_url);

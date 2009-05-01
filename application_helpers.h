@@ -29,13 +29,10 @@ along with cltwitter.  If not, see <http://www.gnu.org/licenses/>.
   #include <sys/types.h>
 #endif
 #include <string.h>
-#include <oauth.h>
-#include "oauth_helpers.h"
 
 int find_flag(char*, int, char**);
 char *get_absolute_path(const char*);
 char *get_browser_cmd();
-token *get_access_token(void);
 config *parse_config(void);
 
 #endif /* APPLICATION_HELPERS_H */

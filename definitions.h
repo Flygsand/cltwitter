@@ -34,7 +34,7 @@ along with cltwitter.  If not, see <http://www.gnu.org/licenses/>.
   #define DS "/"
 #endif
 
-#define VERSION "20090414"
+#define VERSION "20090501"
 #define USERAGENT_HEADER "cltwitter (" VERSION ")"
 #define CONFIG_FILENAME ".cltwitter"
 #define TOKEN_FILENAME ".cltwitter.token"
