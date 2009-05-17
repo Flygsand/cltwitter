@@ -28,7 +28,12 @@ Windows:
 
 CONFIGURATION)
 ==============
-NOTE: If you are not planning on using Twitpic, you need not do any configuration at all. cltwitter now supports OAuth, and upon your first tweet you will be asked to authorize cltwitter to post messages to your Twitter timeline. Twitpic doesn't support OAuth at the moment, so therefore cltwitter needs your username and password. However, the communication is secure as it takes place over HTTPS. cltwitter will be switching to img.ly (which supports OAuth) for image uploading in future versions, which will make this section obsolete.
+NOTE: If you are not planning on using Twitpic, you need not do any configuration at all. 
+cltwitter now supports OAuth, and upon your first tweet you will be asked to authorize cltwitter 
+to post messages to your Twitter timeline. Twitpic doesn't support OAuth at the moment, so 
+therefore cltwitter needs your username and password. However, the communication is secure 
+as it takes place over HTTPS. cltwitter will be switching to img.ly (which supports OAuth) 
+for image uploading in future versions, which will make this section obsolete.
 
 Create the file .cltwitter in your home directory.
 
