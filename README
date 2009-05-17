@@ -4,10 +4,10 @@ cltwitter - a command-line utility for Twitter
 
 DEPENDENCIES)
 =============
- - libcurl
- - libpcre
- - libxml2
- - liboauth
+ - libcurl (http://curl.haxx.se)
+ - libpcre (http://www.pcre.org)
+ - libxml2 (http://www.xmlsoft.org)
+ - liboauth (http://liboauth.sourceforge.net)
  
 INSTALLATION)
 =============
@@ -23,11 +23,13 @@ INSTALLATION)
 Windows:
   Binary: Download "latest" here: http://io.thesmilingpenguin.com/cltwitter/tweet.exe
           Copy it to C:\Windows or C:\Windows\system32 (or any other place that is in your
-          PATH). Note that "latest" may actually be far behind the HEAD of the master and
-          thus lack features.
+          PATH). Note that "latest" may actually be far behind the HEAD of master and
+          thus lack the latest features.
 
 CONFIGURATION)
 ==============
+NOTE: If you are not planning on using Twitpic, you need not do any configuration at all. cltwitter now supports OAuth, and upon your first tweet you will be asked to authorize cltwitter to post messages to your Twitter timeline. Twitpic doesn't support OAuth at the moment, so therefore cltwitter needs your username and password. However, the communication is secure as it takes place over HTTPS. cltwitter will be switching to img.ly (which supports OAuth) for image uploading in future versions, which will make this section obsolete.
+
 Create the file .cltwitter in your home directory.
 
 *NIX
@@ -74,6 +76,6 @@ Tweeting a picture to Twitpic:
 
 NOTES)
 ======
-In accordance with Twitter regulations, the supplied message must be 1-140 characters long. 
+As usual the tweets must be 1-140 characters long. 
 
 HAPPY TWEETING!
