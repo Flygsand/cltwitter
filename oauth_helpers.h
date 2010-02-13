@@ -9,7 +9,6 @@
 #include <oauth.h>
 #include "definitions.h"
 #include "application_helpers.h"
-#include "oauth_secret.h"
 
 token *get_access_token(void);
 char *my_oauth_sign_url (const char *url, int argc, char **postargs, 

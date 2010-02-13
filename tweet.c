@@ -33,7 +33,6 @@ along with cltwitter.  If not, see <http://www.gnu.org/licenses/>.
 #include "string_io_helpers.h"
 #include "xml_helpers.h"
 #include "oauth_helpers.h"
-#include "oauth_secret.h"
 
 int main(int argc, char *argv[]) {
   /* definitions */
@@ -211,7 +210,7 @@ int main(int argc, char *argv[]) {
     if (!oauth_postargs) { curl_easy_cleanup(curl); COMPLAIN_AND_EXIT("Error: Memory allocation error.\n"); }
     
     SNPRINTF(oauth_postargs, oauth_postargs_length, "status=%s", trimmed_input);   
-    signed_update_url = my_oauth_sign_url(TWITTER_UPDATE_URL, 1, &oauth_postargs, OA_HMAC, OAUTH_CONSUMER_KEY, oauth_consumer_secret(), tok->key, tok->secret);
+    signed_update_url = my_oauth_sign_url(TWITTER_UPDATE_URL, 1, &oauth_postargs, OA_HMAC, OAUTH_CONSUMER_KEY, OAUTH_CONSUMER_SECRET, tok->key, tok->secret);
     free(tok);
     if (mode == CLTWITTER_STDIN) free(input);
     
