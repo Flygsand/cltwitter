@@ -55,7 +55,7 @@ char *shorten_url(char *url) {
   size_t size = strlen(IS_GD_API) + strlen(url_encoded_url) + 1;
   CURLcode res;
   CURL *curl;
-  unsigned long response_code;
+  long response_code;
   memory response_data = {NULL, 0};
   
   is_gd_url = malloc(size);

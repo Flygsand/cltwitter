@@ -157,12 +157,14 @@ token *get_access_token() {
     
     return tok;
   } else {
-    req_url = oauth_sign_url(OAUTH_REQUEST_TOKEN_URL, &postargs, OA_HMAC, OAUTH_CONSUMER_KEY, OAUTH_CONSUMER_SECRET, NULL, NULL);
+    req_url = oauth_sign_url2(OAUTH_REQUEST_TOKEN_URL, &postargs, OA_HMAC, NULL, OAUTH_CONSUMER_KEY, OAUTH_CONSUMER_SECRET, NULL, NULL);
     
     if (!req_url) {
       free(token_path); return NULL;
     }
     
+    printf("req url: %s\n", req_url);
+    printf("postargs: %s\n", postargs);
     reply = oauth_http_post(req_url, postargs);
     if (postargs) free(postargs);
     free(req_url);
@@ -189,7 +191,7 @@ token *get_access_token() {
 
     while((c = getchar()) != '\n' && c != EOF) ;
     
-    req_url = oauth_sign_url(OAUTH_ACCESS_TOKEN_URL, &postargs, OA_HMAC, OAUTH_CONSUMER_KEY, OAUTH_CONSUMER_SECRET, t_key, t_secret);  // segfault?
+    req_url = oauth_sign_url2(OAUTH_ACCESS_TOKEN_URL, &postargs, OA_HMAC, NULL, OAUTH_CONSUMER_KEY, OAUTH_CONSUMER_SECRET, t_key, t_secret);  // segfault?
     
     if (!req_url) { free(token_path); return NULL; }
     

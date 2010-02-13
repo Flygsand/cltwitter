@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
   config *cfg;
   CURL *curl;
   CURLcode res;
-  unsigned long response_code;
+  long response_code;
   memory friends_xml = {NULL, 0};
   xmlDocPtr doc;
   xmlXPathObjectPtr xpath_result;
