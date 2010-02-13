@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
     (upload_only_flag_position > 0 && upload_only_flag_position < 3)
     || (argc == 4 && upload_only_flag_position == -1)
     || argc > 4) {
-    COMPLAIN_AND_EXIT("cltwitter, version " VERSION "\nUsage: tweet [message [image_path [--upload-only]]]" \
+    COMPLAIN_AND_EXIT("cltwitter (" VERSION ")\nUsage: tweet [message [image_path [--upload-only]]]" \
                       "\n\nExplanation:\n" \
                       "message - the message to be posted to Twitter. Messages containing spaces must be quoted.\n" \
                       "image_path - specifies the path to an image on the local filesystem that will be uploaded to Twitpic.\n" \

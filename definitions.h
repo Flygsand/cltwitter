@@ -22,6 +22,8 @@ along with cltwitter.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef DEFINITIONS_H
 #define DEFINITIONS_H
 
+#include "config.h"
+
 #ifdef _WIN32
   #define CURL_STATICLIB
   #define PCRE_STATIC
@@ -34,8 +36,7 @@ along with cltwitter.  If not, see <http://www.gnu.org/licenses/>.
   #define DS "/"
 #endif
 
-#define VERSION "20090501"
-#define USERAGENT_HEADER "cltwitter (" VERSION ")"
+#define USERAGENT_HEADER PACKAGE " (" VERSION ")"
 #define CONFIG_FILENAME ".cltwitter"
 #define TOKEN_FILENAME ".cltwitter.token"
 #define CACHE_FILENAME ".cltwitter_users.cache"
