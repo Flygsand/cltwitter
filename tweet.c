@@ -66,22 +66,18 @@ int main(int argc, char *argv[]) {
                       "--upload-only - upload image to Twitpic, but do not post to Twitter. Only valid if image_path is given.\n" \
                       "\nIf no arguments are given, the message argument will be read from standard input.\n");
   } else if (argc < 2) {
-    printf("stdin\n");
     mode = CLTWITTER_STDIN;
     input = get_line(stdin);
     tok = get_access_token();
   } else if (argc == 2) {
-    printf("arg\n");
     mode = CLTWITTER_ARG;
     input = argv[1];
     tok = get_access_token();
   } else if (argc == 3) {
-    printf("twitpic\n");
     mode = CLTWITTER_TWITPIC;
     input = argv[1];
     cfg = parse_config();
   } else if (argc == 4 && upload_only_flag_position == 3) {
-    printf("upload\n");
     mode = CLTWITTER_TWITPIC_UPLOAD_ONLY;
     input = argv[1];
     cfg = parse_config();

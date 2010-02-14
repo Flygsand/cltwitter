@@ -106,24 +106,27 @@ char *my_oauth_sign_url (const char *url, int argc, char **postargs,
 
 int parse_reply(const char *reply, char **token, char **secret) {
   int rc;
-  int ok=1;
+  int ok = 1;
   char **rv = NULL;
   rc = oauth_split_url_parameters(reply, &rv);
-  qsort(rv, rc, sizeof(char *), oauth_cmpstringp);
-  if( rc==2 
-      && !strncmp(rv[0],"oauth_token=",11)
+
+  if( rc >= 2
+      && !strncmp(rv[0],"oauth_token=", 11)
       && !strncmp(rv[1],"oauth_token_secret=",18) ) {
-    ok=0;
-    if (token)  *token =strdup(&(rv[0][12]));
-    if (secret) *secret=strdup(&(rv[1][19]));
+    ok = 0;
+    if (token)  *token = strdup(&(rv[0][12]));
+    if (secret) *secret = strdup(&(rv[1][19]));
   }
   if(rv) free(rv);
   return ok;
 }
 
 token *get_access_token() {
-  char *token_path = get_absolute_path(TOKEN_FILENAME), *req_url = NULL, *reply = NULL, line[1024], c,
-        *authorize_url, *browser, *file_data, *postargs = NULL, *t_key = NULL, *t_secret = NULL;
+  char *token_path = get_absolute_path(TOKEN_FILENAME), *req_url = NULL, 
+    *reply = NULL, line[1024], c, *authorize_url, *browser, *file_data, 
+    *postargs = NULL, *t_key = NULL, *t_secret = NULL;
+  size_t size;
+  int i;
   bool has_access_token_key, has_access_token_secret;
   FILE *fp; 
   token *tok;
@@ -163,8 +166,6 @@ token *get_access_token() {
       free(token_path); return NULL;
     }
     
-    printf("req url: %s\n", req_url);
-    printf("postargs: %s\n", postargs);
     reply = oauth_http_post(req_url, postargs);
     if (postargs) free(postargs);
     free(req_url);
@@ -177,8 +178,7 @@ token *get_access_token() {
     SNPRINTF(authorize_url, 1024, S(OAUTH_AUTHORIZE_URL) "?oauth_token=%s", t_key);
     browser = get_browser_cmd(authorize_url);
     printf("You need to allow cltwitter access to your Twitter profile. You will only need to do " \
-           "this once. cltwitter will now try to open your browser and point you to Twitter's " \
-           "authorization process. After you're done, press ENTER to continue.\n");
+           "this once. cltwitter will now try to open your browser and point you to twitter.com.\n");
            
     if (!browser) {
       printf("\nNotice: Could not detect your browser. Please go to this URL to complete the process: %s\n", authorize_url);
@@ -188,10 +188,30 @@ token *get_access_token() {
     }
     
     free(authorize_url);
-
-    while((c = getchar()) != '\n' && c != EOF) ;
     
-    req_url = oauth_sign_url2(OAUTH_ACCESS_TOKEN_URL, &postargs, OA_HMAC, NULL, OAUTH_CONSUMER_KEY, OAUTH_CONSUMER_SECRET, t_key, t_secret);  // segfault?
+    printf("\nEnter the 7 digit PIN code provided by Twitter: ");
+    
+
+    while (TRUE) {
+      i = 0;
+      while((c = getchar()) != '\n' && c != EOF && i < 1023) {
+        line[i] = c;
+        ++i;
+      }
+      
+      if (i == 7) {
+        line[i] = '\0';
+        break;
+      } else {
+        printf("Given PIN code is not 7 digits long, please try again: ");
+      }
+    }
+    
+    size = sizeof(OAUTH_ACCESS_TOKEN_URL) + 24;
+    req_url = (char *) malloc(size);
+    SNPRINTF(req_url, size, "%s?oauth_verifier=%s", OAUTH_ACCESS_TOKEN_URL, line);
+
+    req_url = oauth_sign_url2(req_url, &postargs, OA_HMAC, NULL, OAUTH_CONSUMER_KEY, OAUTH_CONSUMER_SECRET, t_key, t_secret);  // segfault?
     
     if (!req_url) { free(token_path); return NULL; }
     
