@@ -13,14 +13,10 @@ authorization scheme, mitigating the need for passwords to be sent across the wi
   <li>Handles input data from both the command line and standard input (e.g. piping)</li>
   <li>Supports image posting to <a href="http://twitpic.com">Twitpic</a></li>
   <li>Auto-shortens URLs using the <a href="http://is.gd">is.gd</a> API</li>
-  <li>Tab-completes Twitter screen names (<a title="Bourne-again shell" href="http://en.wikipedia.org/wiki/Bash">Bash</a> only)</li>
+  <li>Tab-completes Twitter screen names</li>
 </ul>
 
 <h2>Example usage</h2>
-<p>cltwitter supplies a command <code class="terminal">tweet</code></pre> for posting messages to Twitter. The command 
-accepts one argument (the message to be sent) on the command line or, if no argument
-is given, reads one line from standard input. Both usages are depicted below.</p>
-
 <p>Supplying Twitter message on the command line:</p>
 <pre class="terminal"><code>$ tweet &quot;Hello Twitter!&quot;</code></pre>
 
@@ -33,11 +29,15 @@ is given, reads one line from standard input. Both usages are depicted below.</p
 <p>Posting images to Twitpic:</p>
 <pre class="terminal"><code>$ tweet &quot;An image says more than a thousand tweets.&quot; ~/images/birdhouse.jpg</code></pre>
 
+<p>Upload, but do not tweet:</p>
+<pre class="terminal"><code>$ tweet &quot;This is a photo.&quot; ~/images/photo.jpg --upload-only</code></pre>
+
 <h2>Get it</h2>
 <ul>
   <li><a href="http://github.com/mtah/cltwitter/tarball/master">Source tarball</a></li>
-  <li><a href="http://io.thesmilingpenguin.com/cltwitter/tweet.exe">Windows binary (x86 32-bit)</a><br />
-      <small><strong>Note: </strong> the Windows binary might be lagging behind the source release <em>a lot</em> and thus
+  <li>Linux distribution packages: <a href="http://aur.archlinux.org/packages.php?ID=34616">Arch Linux</a></li>
+  <li><a href="http://github.com/mtah/cltwitter/downloads">Windows binaries (x86 32-bit)</a><br />
+      <small><strong>Note: </strong> the latest Windows binary might be lagging behind the source release <em>a lot</em> and thus
        lacking the latest features documented here.</small></li>
 </ul>
 
@@ -52,8 +52,7 @@ make your changes and send me a pull request.</p>
 <h2>TODO</h2>
 <ul>
   <li>Tab-completion in other shells, such as zsh</li>
-  <li>Switch to <a href="http://img.ly">img.ly</a> or similar picture upload service that supports <a href="http://oauth.net">OAuth</a> in order to unify authorization.</li>
-  <li>An easter egg ;)</li>
+  <li><a href="http://status.net">status.net</a> (<a href="http://identi.ca">identi.ca</a>) support</li>
 </ul>
 
 <h2>License</h2>
