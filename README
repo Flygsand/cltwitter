@@ -12,28 +12,27 @@ DEPENDENCIES)
 INSTALLATION)
 =============
 *NIX:
-  make && sudo make install
-  NOTE: Bash users will want to add the line "source /etc/cltwitter/completion.bash" to
-        their .bashrc or .bash_profile to enable tab completion for @replies.
+  $ ./autogen.sh
+  $ ./configure
+  $ make
+  # make install
 
-  If you're not using Bash, there's no point in installing the facilities for tab completion.
-  In this case, run 'make tweet && sudo make install_tweet' instead to only install the
-  Twitter client. This will hopefully be handled by a configure script in the future. 
+Windows: 
+  Download the "latest" cltwitter binary from
+  http://github.com/mtah/cltwitter/downloads Copy it to C:\Windows or
+  C:\Windows\system32 (or any other place that is in your PATH). Note
+  that "latest" may actually be far behind the HEAD of master and thus
+  lack the latest features.
 
-Windows:
-  Binary: Download "latest" here: http://io.thesmilingpenguin.com/cltwitter/tweet.exe
-          Copy it to C:\Windows or C:\Windows\system32 (or any other place that is in your
-          PATH). Note that "latest" may actually be far behind the HEAD of master and
-          thus lack the latest features.
-
-CONFIGURATION)
-==============
-NOTE: If you are not planning on using Twitpic, you need not do any configuration at all. 
-cltwitter now supports OAuth, and upon your first tweet you will be asked to authorize cltwitter 
-to post messages to your Twitter timeline. Twitpic doesn't support OAuth at the moment, so 
-therefore cltwitter needs your username and password. However, the communication is secure 
-as it takes place over HTTPS. cltwitter will be switching to img.ly (which supports OAuth) 
-for image uploading in future versions, which will make this section obsolete.
+CONFIGURATION) 
+============== 
+NOTE: If you are not planning on using Twitpic to post images via
+cltwitter , you need not do any configuration at all.  cltwitter now
+supports OAuth, and upon your first tweet you will be asked to
+authorize cltwitter to post messages to your Twitter timeline. Twitpic
+doesn't support OAuth at the moment, so therefore cltwitter needs your
+username and password. However, the communication is secure as it
+takes place over HTTPS.
 
 Create the file .cltwitter in your home directory.
 
@@ -52,32 +51,39 @@ The contents of .cltwitter should look like this:
   username=<twitter_username>
   password=<twitter_password>
   
-where <twitter_username> and <twitter_password> represents the username and password
-for your Twitter account. NOTE: The configuration file parser is currently sensitive
-to white-space. As an example, "username = john" will not parse, but "username=john" will.  
+where <twitter_username> and <twitter_password> represents the
+username and password for your Twitter account. NOTE: The
+configuration file parser is currently sensitive to white-space. As an
+example, "username = john" will not parse, but "username=john" will.
 
 USAGE)
 ======
-NOTE: The first time "tweet" is invoked, you will be asked to authorize cltwitter
-access to your Twitter profile on Twitter's site. cltwitter uses the OAuth scheme 
-which eliminates the need for sending passwords over the wire.
-
-cltwitter supplies a command "tweet" for posting messages to Twitter. The command 
-accepts one argument (the message to be sent) on the command line or, if no argument
-is given, reads one line from standard input. Both usages are depicted below:
 
 Supplying Twitter message on the command line:
-  tweet "Hello Twitter!"
+  
+  $ tweet "Hello Twitter!"
 
-Tweeting a random fortune cookie:
-  fortune | tweet
+Tweeting from standard input:
+  
+  $ fortune | tweet
 
 Using the tab-completion feature:
-  tweet "@s<TAB>
+  
+  $ tweet "@s<TAB>
   @sourcebits @spolsky
 
 Tweeting a picture to Twitpic:
-  tweet "An image says more than a thousand tweets." ~/images/birdhouse.jpg
+  
+  $ tweet "An image says more than a thousand tweets." ~/images/birdhouse.png
+
+Upload, but do not tweet:
+  
+  $ tweet "This is a photo." ~/images/photo.jpg --upload-only
+
+NOTE: The first time the "tweet" command is invoked, you will be asked
+to grant cltwitter access to your Twitter profile. cltwitter uses the
+OAuth scheme which eliminates the need for sending passwords over the
+wire.
 
 NOTES)
 ======
