@@ -1,0 +1,51 @@
+.TH tweet 1
+.
+.SH NAME
+tweet - command-line utility for posting updates to Twitter
+.
+.SH SYNOPSIS
+.B tweet
+[
+.I message 
+[
+.I image 
+[
+.B --upload-only
+]
+]
+]
+.
+.SH DESCRIPTION
+tweet posts a 
+.I message
+to the user's Twitter timeline. If 
+.I message 
+is not given, 
+.B tweet
+reads from standard input.
+.
+.PP
+Optionally, the user can specify an 
+.I image
+that will be uploaded to an image hosting service. An URL to the image
+will be included in the posted message unless the 
+.B --upload-only
+flag is also given.
+.
+.PP
+Visit http://mtah.github.com/cltwitter for the latest updates.
+.
+.SH OPTIONS
+.IP --upload-only
+Upload 
+.I image 
+but do not tweet its URL.
+.
+.SH FILES
+.I $HOME/.cltwitter
+.RS
+Per-user Twitter credentials used for non-OAuth third party services.
+.RE
+.
+.SH AUTHOR
+Martin Häger <martin.haeger@gmail.com>
