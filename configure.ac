@@ -1,6 +1,6 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
-AC_PREREQ([2.65])
+AC_PREREQ([2.55])
 
 AC_INIT([cltwitter], [git], [martin.haeger@gmail.com])
 AM_INIT_AUTOMAKE([cltwitter], [git])
