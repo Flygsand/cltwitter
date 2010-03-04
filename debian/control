@@ -1,0 +1,16 @@
+Source: cltwitter
+Section: network
+Priority: extra
+Maintainer: Martin Häger <martin.haeger@gmail.com>
+Build-Depends: debhelper (>= 7), libcurl4-gnutls-dev, libxml2-dev, libpcre3-dev, liboauth-dev
+Standards-Version: 3.8.1
+Homepage: http://mtah.github.com/cltwitter
+
+Package: cltwitter
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: cltwitter is a command-line utility for posting updates to Twitter written in C.  
+ Tweet like a hacker. cltwitter is a command-line utility for posting
+ updates to Twitter written in C. cltwitter uses the OAuth
+ authorization scheme, mitigating the need for passwords to be sent
+ across the wire.
